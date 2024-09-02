@@ -1,4 +1,7 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+﻿using FantaCalcio.Data;
+using Microsoft.EntityFrameworkCore;
+
+var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
@@ -8,6 +11,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+var ConnString = builder.Configuration.GetConnectionString("AppDb")!;
+builder.Services.AddDbContext<ApplicationDbContext>(opt => opt.UseSqlServer(ConnString));
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
