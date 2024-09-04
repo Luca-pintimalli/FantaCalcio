@@ -1,5 +1,10 @@
 ﻿using FantaCalcio.Data;
+using FantaCalcio.Models;
+using FantaCalcio.Services;
+using FantaCalcio.Services.Interface;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,10 +15,42 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var ConnString = builder.Configuration.GetConnectionString("AppDb")!;
+builder.Services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(ConnString));
+
+
+// definizione delle regole di autenticazione
+string key = builder.Configuration["Jwt:Key"]!;
+var bytesKey = System.Text.Encoding.UTF8.GetBytes(key);
+
+builder.Services
+    .AddAuthentication(opt => {
+        opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(opt => { // configurazione delle caratteristiche del token JWT
+        opt.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(bytesKey)
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddScoped<IGiocatoreService,GiocatoriService>();
+
+
+
 var app = builder.Build();
 
-var ConnString = builder.Configuration.GetConnectionString("AppDb")!;
-builder.Services.AddDbContext<ApplicationDbContext>(opt => opt.UseSqlServer(ConnString));
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -23,6 +60,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
