@@ -4,6 +4,7 @@ using FantaCalcio.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FantaCalcio.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240904222239_InitialMigration")]
+    partial class InitialMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -84,9 +87,6 @@ namespace FantaCalcio.Migrations
                     b.Property<int>("GoalSubiti")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ID_Squadra")
-                        .HasColumnType("int");
-
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -95,11 +95,6 @@ namespace FantaCalcio.Migrations
                     b.Property<int>("PartiteGiocate")
                         .HasColumnType("int");
 
-                    b.Property<string>("RuoloClassic")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("SquadraAttuale")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -107,9 +102,27 @@ namespace FantaCalcio.Migrations
 
                     b.HasKey("ID_Giocatore");
 
-                    b.HasIndex("ID_Squadra");
-
                     b.ToTable("Giocatori");
+                });
+
+            modelBuilder.Entity("FantaCalcio.Models.GiocatoreRuoloModalita", b =>
+                {
+                    b.Property<int>("ID_Giocatore")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ID_Ruolo")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ID_Asta")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID_Giocatore", "ID_Ruolo", "ID_Asta");
+
+                    b.HasIndex("ID_Asta");
+
+                    b.HasIndex("ID_Ruolo");
+
+                    b.ToTable("GiocatoreRuoloModalita");
                 });
 
             modelBuilder.Entity("FantaCalcio.Models.Modalita", b =>
@@ -172,6 +185,7 @@ namespace FantaCalcio.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID_Ruolo"));
 
                     b.Property<int>("ID_Modalita")
+                        .HasMaxLength(50)
                         .HasColumnType("int");
 
                     b.Property<string>("NomeRuolo")
@@ -184,29 +198,6 @@ namespace FantaCalcio.Migrations
                     b.HasIndex("ID_Modalita");
 
                     b.ToTable("Ruoli");
-                });
-
-            modelBuilder.Entity("FantaCalcio.Models.RuoloMantra", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<int>("ID_Giocatore")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ID_Ruolo")
-                        .HasColumnType("int");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("ID_Giocatore");
-
-                    b.HasIndex("ID_Ruolo");
-
-                    b.ToTable("RuoloMantra");
                 });
 
             modelBuilder.Entity("FantaCalcio.Models.Squadra", b =>
@@ -329,13 +320,31 @@ namespace FantaCalcio.Migrations
                     b.Navigation("Utente");
                 });
 
-            modelBuilder.Entity("FantaCalcio.Models.Giocatore", b =>
+            modelBuilder.Entity("FantaCalcio.Models.GiocatoreRuoloModalita", b =>
                 {
-                    b.HasOne("FantaCalcio.Models.Squadra", "Squadra")
-                        .WithMany("Giocatori")
-                        .HasForeignKey("ID_Squadra");
+                    b.HasOne("FantaCalcio.Models.Asta", "Asta")
+                        .WithMany("GiocatoreRuoloModalitas")
+                        .HasForeignKey("ID_Asta")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
-                    b.Navigation("Squadra");
+                    b.HasOne("FantaCalcio.Models.Giocatore", "Giocatore")
+                        .WithMany("GiocatoreRuoloModalitas")
+                        .HasForeignKey("ID_Giocatore")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("FantaCalcio.Models.Ruolo", "Ruolo")
+                        .WithMany("GiocatoreRuoloModalitas")
+                        .HasForeignKey("ID_Ruolo")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Asta");
+
+                    b.Navigation("Giocatore");
+
+                    b.Navigation("Ruolo");
                 });
 
             modelBuilder.Entity("FantaCalcio.Models.Operazione", b =>
@@ -368,25 +377,6 @@ namespace FantaCalcio.Migrations
                     b.Navigation("Modalita");
                 });
 
-            modelBuilder.Entity("FantaCalcio.Models.RuoloMantra", b =>
-                {
-                    b.HasOne("FantaCalcio.Models.Giocatore", "Giocatore")
-                        .WithMany("RuoliMantra")
-                        .HasForeignKey("ID_Giocatore")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("FantaCalcio.Models.Ruolo", "Ruolo")
-                        .WithMany("RuoliMantra")
-                        .HasForeignKey("ID_Ruolo")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Giocatore");
-
-                    b.Navigation("Ruolo");
-                });
-
             modelBuilder.Entity("FantaCalcio.Models.Squadra", b =>
                 {
                     b.HasOne("FantaCalcio.Models.Asta", "Asta")
@@ -400,14 +390,16 @@ namespace FantaCalcio.Migrations
 
             modelBuilder.Entity("FantaCalcio.Models.Asta", b =>
                 {
+                    b.Navigation("GiocatoreRuoloModalitas");
+
                     b.Navigation("Squadre");
                 });
 
             modelBuilder.Entity("FantaCalcio.Models.Giocatore", b =>
                 {
-                    b.Navigation("Operazioni");
+                    b.Navigation("GiocatoreRuoloModalitas");
 
-                    b.Navigation("RuoliMantra");
+                    b.Navigation("Operazioni");
                 });
 
             modelBuilder.Entity("FantaCalcio.Models.Modalita", b =>
@@ -419,13 +411,11 @@ namespace FantaCalcio.Migrations
 
             modelBuilder.Entity("FantaCalcio.Models.Ruolo", b =>
                 {
-                    b.Navigation("RuoliMantra");
+                    b.Navigation("GiocatoreRuoloModalitas");
                 });
 
             modelBuilder.Entity("FantaCalcio.Models.Squadra", b =>
                 {
-                    b.Navigation("Giocatori");
-
                     b.Navigation("Operazioni");
                 });
 

@@ -14,7 +14,7 @@ namespace FantaCalcio.Models
 
         [Required]
         [MaxLength(100)]
-        public string Cognome { get; set; }  // Aggiunto per includere il cognome
+        public string Cognome { get; set; }  
 
         [Required]
         [MaxLength(100)]
@@ -31,7 +31,7 @@ namespace FantaCalcio.Models
         public string Foto { get; set; }
 
         [Required]
-        public DateTime DataRegistrazione { get; set; }  // Data di registrazione dell'utente
+        public DateTime DataRegistrazione { get; set; }  
 
        
         public ICollection<Asta> Aste { get; set; }

@@ -14,11 +14,7 @@ namespace FantaCalcio.Models
 
         [Required]
         [MaxLength(50)]
-        public string TipoAsta { get; set; } //  "random" o "chiamata", indica il tipo di asta
-
-        [Required]
-        [MaxLength(50)]
-        public string SistemaGioco { get; set; } // Classic o Mantra, specifica il sistema di regole applicato
+        public int ID_TipoAsta { get; set; } //  "random" o "chiamata", indica il tipo di asta
 
         [Required]
         [Range(1, int.MaxValue)]
@@ -29,14 +25,19 @@ namespace FantaCalcio.Models
         public int CreditiDisponibili { get; set; }
 
         [Required]
-        public int ID_Modalita { get; set; }
+        public int ID_Modalita { get; set; } //Classic o Mantra
 
         [ForeignKey("ID_Utente")]
         public Utente Utente { get; set; }
 
         [ForeignKey("ID_Modalita")]
         public Modalita Modalita { get; set; }
+
+        [ForeignKey("ID_TipoAsta")]
+        public TipoAsta TipoAsta { get; set; }
+
+
         public ICollection<Squadra> Squadre { get; set; }
-        public ICollection<GiocatoreRuoloModalita> GiocatoreRuoloModalitas { get; set; }
+
     }
 }

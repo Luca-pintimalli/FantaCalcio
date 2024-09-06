@@ -22,6 +22,9 @@ namespace FantaCalcio.Models
         [Required]
         public DateTime DataOperazione { get; set; } = DateTime.Now;
 
+        public string StatoOperazione { get; set; } = "Libero"; // Default 'Libero' 
+
+
         [ForeignKey("ID_Giocatore")]
         public Giocatore Giocatore { get; set; }
 

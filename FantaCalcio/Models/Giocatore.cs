@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FantaCalcio.Models
 {
@@ -39,8 +40,17 @@ namespace FantaCalcio.Models
         [Range(0, int.MaxValue)]
         public int PartiteGiocate { get; set; } = 0;
 
-        
+        [Required]
+        [MaxLength(50)]
+        public string RuoloClassic { get; set; }
+
+        public int? ID_Squadra { get; set; }
+
+        [ForeignKey("ID_Squadra")]
+        public Squadra Squadra { get; set; }
+
+
         public ICollection<Operazione> Operazioni { get; set; }
-        public ICollection<GiocatoreRuoloModalita> GiocatoreRuoloModalitas { get; set; }
+        public ICollection<RuoloMantra> RuoliMantra { get; set; }
     }
 }

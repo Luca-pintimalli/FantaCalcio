@@ -3,18 +3,15 @@ using System.ComponentModel.DataAnnotations;
 
 namespace FantaCalcio.Models
 {
-    public class Modalita
+    public class TipoAsta
     {
         [Key]
-        public int ID_Modalita { get; set; }
+        public int ID_TipoAsta { get; set; }
 
         [Required]
         [MaxLength(50)]
-        public string TipoModalita { get; set; } // Random o a chiamata
-
+        public string NomeTipoAsta { get; set; }
 
         public ICollection<Asta> Aste { get; set; }
-        public ICollection<Ruolo> Ruoli { get; set; }
-
     }
 }

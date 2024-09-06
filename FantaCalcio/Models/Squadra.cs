@@ -31,6 +31,8 @@ namespace FantaCalcio.Models
         [ForeignKey("ID_Asta")]
         public Asta Asta { get; set; }
 
+        public ICollection<Giocatore> Giocatori { get; set; } 
+
         public ICollection<Operazione> Operazioni { get; set; }
     }
 }

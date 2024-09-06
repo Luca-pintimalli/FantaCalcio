@@ -7,6 +7,7 @@ namespace FantaCalcio.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> opt) : base(opt) { }
 
+        // Definizione dei DbSet per ogni modello. Ogni DbSet rappresenta una tabella nel database
         public DbSet<Utente> Utenti { get; set; }
         public DbSet<Giocatore> Giocatori { get; set; }
         public DbSet<Ruolo> Ruoli { get; set; }
@@ -14,64 +15,76 @@ namespace FantaCalcio.Data
         public DbSet<Asta> Aste { get; set; }
         public DbSet<Squadra> Squadre { get; set; }
         public DbSet<Operazione> Operazioni { get; set; }
-        public DbSet<GiocatoreRuoloModalita> GiocatoreRuoloModalita { get; set; }
+        public DbSet<TipoAsta> TipiAsta { get; set; }  
+        public DbSet<RuoloMantra> RuoloMantra { get; set; } 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configurazione per Asta
-            modelBuilder.Entity<Asta>()
-                .HasKey(a => a.ID_Asta);
+            base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Asta>()
-                .Property(a => a.ID_Utente)
-                .HasColumnName("ID_Utente");
-
+            // Relazione 1:N tra Utente e Asta
             modelBuilder.Entity<Asta>()
                 .HasOne(a => a.Utente)
                 .WithMany(u => u.Aste)
-                .HasForeignKey(a => a.ID_Utente);
+                .HasForeignKey(a => a.ID_Utente)
+                .OnDelete(DeleteBehavior.NoAction);  // No cascading delete
 
-            modelBuilder.Entity<Asta>()
-                .Property(a => a.ID_Modalita)
-                .HasColumnName("ID_Modalita");
-
+            // Relazione 1:N tra Modalita e Asta
             modelBuilder.Entity<Asta>()
                 .HasOne(a => a.Modalita)
                 .WithMany(m => m.Aste)
-                .HasForeignKey(a => a.ID_Modalita);
+                .HasForeignKey(a => a.ID_Modalita)
+                .OnDelete(DeleteBehavior.NoAction);  // No cascading delete
 
-            // Configurazione per Squadra
-            modelBuilder.Entity<Squadra>()
-                .HasKey(s => s.ID_Squadra);
+            // Relazione 1:N tra TipoAsta e Asta
+            modelBuilder.Entity<Asta>()
+                .HasOne(a => a.TipoAsta)
+                .WithMany(ta => ta.Aste)
+                .HasForeignKey(a => a.ID_TipoAsta)
+                .OnDelete(DeleteBehavior.NoAction);  // No cascading delete
 
-            modelBuilder.Entity<Squadra>()
-                .Property(s => s.ID_Asta)
-                .HasColumnName("ID_Asta");
-
+            // Relazione 1:N tra Squadra e Asta
             modelBuilder.Entity<Squadra>()
                 .HasOne(s => s.Asta)
                 .WithMany(a => a.Squadre)
                 .HasForeignKey(s => s.ID_Asta)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);  // No cascading delete
 
-            // Configurazioni per GiocatoreRuoloModalita
-            modelBuilder.Entity<GiocatoreRuoloModalita>()
-                .HasKey(grm => new { grm.ID_Giocatore, grm.ID_Ruolo, grm.ID_Asta });
+            // Relazione 1:N tra Giocatore e Operazione
+            modelBuilder.Entity<Operazione>()
+                .HasOne(o => o.Giocatore)
+                .WithMany(g => g.Operazioni)
+                .HasForeignKey(o => o.ID_Giocatore)
+                .OnDelete(DeleteBehavior.NoAction);  // No cascading delete
 
-            modelBuilder.Entity<GiocatoreRuoloModalita>()
-                .HasOne(grm => grm.Giocatore)
-                .WithMany(g => g.GiocatoreRuoloModalitas)
-                .HasForeignKey(grm => grm.ID_Giocatore);
+            // Relazione 1:N tra Squadra e Operazione
+            modelBuilder.Entity<Operazione>()
+                .HasOne(o => o.Squadra)
+                .WithMany(s => s.Operazioni)
+                .HasForeignKey(o => o.ID_Squadra)
+                .OnDelete(DeleteBehavior.NoAction);  // No cascading delete
 
-            modelBuilder.Entity<GiocatoreRuoloModalita>()
-                .HasOne(grm => grm.Ruolo)
-                .WithMany(r => r.GiocatoreRuoloModalitas)
-                .HasForeignKey(grm => grm.ID_Ruolo);
+            // Relazione 1:N tra Modalita e Ruolo
+            modelBuilder.Entity<Ruolo>()
+                .HasOne(r => r.Modalita)
+                .WithMany(m => m.Ruoli)
+                .HasForeignKey(r => r.ID_Modalita)
+                .OnDelete(DeleteBehavior.NoAction);  // No cascading delete
 
-            modelBuilder.Entity<GiocatoreRuoloModalita>()
-                .HasOne(grm => grm.Asta)
-                .WithMany(a => a.GiocatoreRuoloModalitas)
-                .HasForeignKey(grm => grm.ID_Asta);
+            // Relazione 1:N tra Giocatore e RuoloMantra
+            modelBuilder.Entity<RuoloMantra>()
+                .HasOne(rm => rm.Giocatore)
+                .WithMany(g => g.RuoliMantra)
+                .HasForeignKey(rm => rm.ID_Giocatore)
+                .OnDelete(DeleteBehavior.NoAction);  // No cascading delete
+
+            // Relazione 1:N tra Ruolo e RuoloMantra
+            modelBuilder.Entity<RuoloMantra>()
+                .HasOne(rm => rm.Ruolo)
+                .WithMany(r => r.RuoliMantra)
+                .HasForeignKey(rm => rm.ID_Ruolo)
+                .OnDelete(DeleteBehavior.NoAction);  // No cascading delete
+           
         }
     }
 }

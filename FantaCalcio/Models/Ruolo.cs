@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FantaCalcio.Models
 {
@@ -13,10 +14,13 @@ namespace FantaCalcio.Models
         public string NomeRuolo { get; set; }
 
         [Required]
-        [MaxLength(50)]
-        public string TipoAsta { get; set; } // Classic o Mantra
+        public int ID_Modalita { get; set; } // Classic o Mantra
+
+        [ForeignKey("ID_Modalita")]
+        public Modalita Modalita { get; set; }
 
 
-        public ICollection<GiocatoreRuoloModalita> GiocatoreRuoloModalitas { get; set; }
+        public ICollection<RuoloMantra> RuoliMantra { get; set; } 
+
     }
 }

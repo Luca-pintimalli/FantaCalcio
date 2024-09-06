@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FantaCalcio.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -45,17 +45,16 @@ namespace FantaCalcio.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Ruoli",
+                name: "TipiAsta",
                 columns: table => new
                 {
-                    ID_Ruolo = table.Column<int>(type: "int", nullable: false)
+                    ID_TipoAsta = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    NomeRuolo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    TipoAsta = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                    NomeTipoAsta = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Ruoli", x => x.ID_Ruolo);
+                    table.PrimaryKey("PK_TipiAsta", x => x.ID_TipoAsta);
                 });
 
             migrationBuilder.CreateTable(
@@ -77,14 +76,32 @@ namespace FantaCalcio.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Ruoli",
+                columns: table => new
+                {
+                    ID_Ruolo = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    NomeRuolo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ID_Modalita = table.Column<int>(type: "int", maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Ruoli", x => x.ID_Ruolo);
+                    table.ForeignKey(
+                        name: "FK_Ruoli_Modalita_ID_Modalita",
+                        column: x => x.ID_Modalita,
+                        principalTable: "Modalita",
+                        principalColumn: "ID_Modalita");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Aste",
                 columns: table => new
                 {
                     ID_Asta = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ID_Utente = table.Column<int>(type: "int", nullable: false),
-                    TipoAsta = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    SistemaGioco = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ID_TipoAsta = table.Column<int>(type: "int", maxLength: 50, nullable: false),
                     NumeroSquadre = table.Column<int>(type: "int", nullable: false),
                     CreditiDisponibili = table.Column<int>(type: "int", nullable: false),
                     ID_Modalita = table.Column<int>(type: "int", nullable: false)
@@ -96,14 +113,17 @@ namespace FantaCalcio.Migrations
                         name: "FK_Aste_Modalita_ID_Modalita",
                         column: x => x.ID_Modalita,
                         principalTable: "Modalita",
-                        principalColumn: "ID_Modalita",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "ID_Modalita");
+                    table.ForeignKey(
+                        name: "FK_Aste_TipiAsta_ID_TipoAsta",
+                        column: x => x.ID_TipoAsta,
+                        principalTable: "TipiAsta",
+                        principalColumn: "ID_TipoAsta");
                     table.ForeignKey(
                         name: "FK_Aste_Utenti_ID_Utente",
                         column: x => x.ID_Utente,
                         principalTable: "Utenti",
-                        principalColumn: "ID_Utente",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "ID_Utente");
                 });
 
             migrationBuilder.CreateTable(
@@ -121,20 +141,17 @@ namespace FantaCalcio.Migrations
                         name: "FK_GiocatoreRuoloModalita_Aste_ID_Asta",
                         column: x => x.ID_Asta,
                         principalTable: "Aste",
-                        principalColumn: "ID_Asta",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "ID_Asta");
                     table.ForeignKey(
                         name: "FK_GiocatoreRuoloModalita_Giocatori_ID_Giocatore",
                         column: x => x.ID_Giocatore,
                         principalTable: "Giocatori",
-                        principalColumn: "ID_Giocatore",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "ID_Giocatore");
                     table.ForeignKey(
                         name: "FK_GiocatoreRuoloModalita_Ruoli_ID_Ruolo",
                         column: x => x.ID_Ruolo,
                         principalTable: "Ruoli",
-                        principalColumn: "ID_Ruolo",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "ID_Ruolo");
                 });
 
             migrationBuilder.CreateTable(
@@ -156,8 +173,7 @@ namespace FantaCalcio.Migrations
                         name: "FK_Squadre_Aste_ID_Asta",
                         column: x => x.ID_Asta,
                         principalTable: "Aste",
-                        principalColumn: "ID_Asta",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "ID_Asta");
                 });
 
             migrationBuilder.CreateTable(
@@ -169,7 +185,8 @@ namespace FantaCalcio.Migrations
                     ID_Giocatore = table.Column<int>(type: "int", nullable: false),
                     ID_Squadra = table.Column<int>(type: "int", nullable: false),
                     CreditiSpesi = table.Column<int>(type: "int", nullable: false),
-                    DataOperazione = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    DataOperazione = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    StatoOperazione = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -178,20 +195,23 @@ namespace FantaCalcio.Migrations
                         name: "FK_Operazioni_Giocatori_ID_Giocatore",
                         column: x => x.ID_Giocatore,
                         principalTable: "Giocatori",
-                        principalColumn: "ID_Giocatore",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "ID_Giocatore");
                     table.ForeignKey(
                         name: "FK_Operazioni_Squadre_ID_Squadra",
                         column: x => x.ID_Squadra,
                         principalTable: "Squadre",
-                        principalColumn: "ID_Squadra",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "ID_Squadra");
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Aste_ID_Modalita",
                 table: "Aste",
                 column: "ID_Modalita");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Aste_ID_TipoAsta",
+                table: "Aste",
+                column: "ID_TipoAsta");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Aste_ID_Utente",
@@ -217,6 +237,11 @@ namespace FantaCalcio.Migrations
                 name: "IX_Operazioni_ID_Squadra",
                 table: "Operazioni",
                 column: "ID_Squadra");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Ruoli_ID_Modalita",
+                table: "Ruoli",
+                column: "ID_Modalita");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Squadre_ID_Asta",
@@ -247,6 +272,9 @@ namespace FantaCalcio.Migrations
 
             migrationBuilder.DropTable(
                 name: "Modalita");
+
+            migrationBuilder.DropTable(
+                name: "TipiAsta");
 
             migrationBuilder.DropTable(
                 name: "Utenti");
