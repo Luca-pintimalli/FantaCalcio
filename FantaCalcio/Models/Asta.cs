@@ -36,7 +36,6 @@ namespace FantaCalcio.Models
         [ForeignKey("ID_TipoAsta")]
         public TipoAsta TipoAsta { get; set; }
 
-
         public ICollection<Squadra> Squadre { get; set; }
 
     }

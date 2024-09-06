@@ -44,11 +44,14 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+
+//CONFIGURAZIONE Services 
 builder.Services.AddScoped<IGiocatoreService,GiocatoriService>();
 builder.Services.AddScoped<IModalitaService, ModalitaService>();
 builder.Services.AddScoped<ITipoAstaService, TipoAstaService>();
 builder.Services.AddScoped<IRuoloService, RuoloService>();
 builder.Services.AddScoped<IRuoloMantraService, RuoloMantraService>();
+builder.Services.AddScoped<IAstaService, AstaService>();
 
 
 

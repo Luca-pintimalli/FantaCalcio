@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using FantaCalcio.Models;
+using FantaCalcio.DTOs;
 using FantaCalcio.Services.Interface;
 
 namespace FantaCalcio.Controllers
@@ -17,17 +17,15 @@ namespace FantaCalcio.Controllers
             _astaService = astaService;
         }
 
-        // GET: api/asta
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Asta>>> GetAll()
+        public async Task<ActionResult<IEnumerable<AstaDto>>> GetAll()
         {
             var aste = await _astaService.GetAll();
             return Ok(aste);
         }
 
-        // GET: api/asta/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Asta>> GetById(int id)
+        public async Task<ActionResult<AstaDto>> GetById(int id)
         {
             var asta = await _astaService.GetAstaById(id);
             if (asta == null)
@@ -37,19 +35,33 @@ namespace FantaCalcio.Controllers
             return Ok(asta);
         }
 
-        // POST: api/asta
         [HttpPost]
-        public async Task<ActionResult<Asta>> Create([FromBody] Asta asta)
+        public async Task<ActionResult<AstaDto>> Create([FromBody] AstaCreateUpdateDto astaDto)
         {
-            if (asta == null)
+            if (astaDto == null)
             {
                 return BadRequest("L'asta non può essere null.");
             }
 
+            // Ottieni l'ID dell'utente autenticato dal token JWT
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return Unauthorized("Utente non autenticato.");
+            }
+
+            // Converti l'ID utente da stringa a intero
+            if (!int.TryParse(userIdClaim, out int userId))
+            {
+                return BadRequest("ID utente non valido.");
+            }
+
             try
             {
-                await _astaService.AddAsta(asta);
-                return CreatedAtAction(nameof(GetById), new { id = asta.ID_Asta }, asta);
+                // Passa l'ID utente al servizio
+                await _astaService.AddAsta(userId, astaDto);
+                return CreatedAtAction(nameof(GetById), new { id = astaDto.ID_TipoAsta }, astaDto);
             }
             catch (Exception ex)
             {
@@ -57,18 +69,25 @@ namespace FantaCalcio.Controllers
             }
         }
 
-        // PUT: api/asta/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Asta asta)
+        public async Task<IActionResult> Update(int id, [FromBody] AstaCreateUpdateDto astaDto)
         {
-            if (asta == null || id != asta.ID_Asta)
+            if (astaDto == null)
             {
-                return BadRequest("ID non corrispondente o asta null.");
+                return BadRequest("L'asta non può essere null.");
+            }
+
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized("Utente non autenticato.");
             }
 
             try
             {
-                await _astaService.UpdateAsta(id, asta);
+                // Passa l'ID utente e il DTO al servizio
+                await _astaService.UpdateAsta(id, userId, astaDto);
                 return NoContent();
             }
             catch (KeyNotFoundException)
@@ -81,7 +100,7 @@ namespace FantaCalcio.Controllers
             }
         }
 
-        // DELETE: api/asta/5
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -97,3 +116,4 @@ namespace FantaCalcio.Controllers
         }
     }
 }
+

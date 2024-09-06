@@ -15,7 +15,7 @@ namespace FantaCalcio.Data
         public DbSet<Asta> Aste { get; set; }
         public DbSet<Squadra> Squadre { get; set; }
         public DbSet<Operazione> Operazioni { get; set; }
-        public DbSet<TipoAsta> TipiAsta { get; set; }  
+        public DbSet<TipoAsta> TipoAsta { get; set; }  
         public DbSet<RuoloMantra> RuoloMantra { get; set; } 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

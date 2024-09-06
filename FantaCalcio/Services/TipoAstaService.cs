@@ -17,32 +17,32 @@ namespace FantaCalcio.Services
 
         public async Task AddTipoAstaAsync(TipoAsta tipoAsta)
         {
-            _dbContext.TipiAsta.Add(tipoAsta);
+            _dbContext.TipoAsta.Add(tipoAsta);
             await _dbContext.SaveChangesAsync();
         }
 
         public async Task DeleteTipoAstaAsync(int ID_TipoAsta)
         {
-            var tipoAsta = await _dbContext.TipiAsta.FirstOrDefaultAsync(t => t.ID_TipoAsta == ID_TipoAsta);
+            var tipoAsta = await _dbContext.TipoAsta.FirstOrDefaultAsync(t => t.ID_TipoAsta == ID_TipoAsta);
             if(tipoAsta == null)
             {
                 throw new Exception($"TipoAsta con ID {ID_TipoAsta} non trovato");
             }
 
-            _dbContext.TipiAsta.Remove(tipoAsta);
+            _dbContext.TipoAsta.Remove(tipoAsta);
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<TipoAsta>> GetAll() => await _dbContext.TipiAsta.ToListAsync();      
+        public async Task<IEnumerable<TipoAsta>> GetAll() => await _dbContext.TipoAsta.ToListAsync();      
 
         public async Task<TipoAsta> GetTipoAstaById(int ID_TipoAsta)
         {
-            return await _dbContext.TipiAsta.FindAsync(ID_TipoAsta);
+            return await _dbContext.TipoAsta.FindAsync(ID_TipoAsta);
         }
 
         public async Task UpdateTipoAstaAsync(int ID_TipoAsta, TipoAsta tipoAstaAggiornato)
         {
-            var tipoAstaEsistente = await _dbContext.TipiAsta.FindAsync(ID_TipoAsta);
+            var tipoAstaEsistente = await _dbContext.TipoAsta.FindAsync(ID_TipoAsta);
 
             if(tipoAstaEsistente == null)
             {
