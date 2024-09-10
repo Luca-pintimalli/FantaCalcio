@@ -10,6 +10,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        policy =>
+        {
+            //ci mettiamo le viste dei nostri FE 
+            policy.WithOrigins("http://localhost:4200")  //porta di angular 
+            .AllowAnyHeader() //accettiamo qualsiasi header 
+            .AllowAnyMethod(); //accettiamo qualsiasi metodo 
+        });
+});
+
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -52,6 +65,8 @@ builder.Services.AddScoped<ITipoAstaService, TipoAstaService>();
 builder.Services.AddScoped<IRuoloService, RuoloService>();
 builder.Services.AddScoped<IRuoloMantraService, RuoloMantraService>();
 builder.Services.AddScoped<IAstaService, AstaService>();
+builder.Services.AddScoped<ISquadraService, SquadraService>();
+builder.Services.AddScoped<IOperazioneService, OperazioneService>();
 
 
 
@@ -68,6 +83,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors();
 
 app.UseAuthentication();
 

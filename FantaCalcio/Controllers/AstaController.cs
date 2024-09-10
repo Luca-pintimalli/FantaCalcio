@@ -30,10 +30,11 @@ namespace FantaCalcio.Controllers
             var asta = await _astaService.GetAstaById(id);
             if (asta == null)
             {
-                return NotFound();
+                return NotFound($"Asta con ID {id} non trovata.");
             }
             return Ok(asta);
         }
+
 
         [HttpPost]
         public async Task<ActionResult<AstaDto>> Create([FromBody] AstaCreateUpdateDto astaDto)
@@ -59,9 +60,11 @@ namespace FantaCalcio.Controllers
 
             try
             {
-                // Passa l'ID utente al servizio
-                await _astaService.AddAsta(userId, astaDto);
-                return CreatedAtAction(nameof(GetById), new { id = astaDto.ID_TipoAsta }, astaDto);
+                // Crea l'asta e ottieni il suo ID
+                var astaCreata = await _astaService.AddAsta(userId, astaDto);
+
+                // Usa l'ID dell'asta appena creata per il ritorno
+                return CreatedAtAction(nameof(GetById), new { id = astaCreata.ID_Asta }, astaCreata);
             }
             catch (Exception ex)
             {
@@ -109,11 +112,58 @@ namespace FantaCalcio.Controllers
                 await _astaService.DeleteAsta(id);
                 return NoContent();
             }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound($"Asta con ID {id} non trovata: {ex.Message}");
+            }
             catch (Exception ex)
             {
-                return NotFound($"Errore durante la cancellazione dell'asta: {ex.Message}");
+                return BadRequest($"Errore durante la cancellazione dell'asta: {ex.Message}");
+            }
+        }
+
+
+        // API per ottenere il prossimo giocatore in base alla squadra
+        [HttpGet("prossimogiocatore")]
+        public async Task<ActionResult<GiocatoreDto>> ProssimoGiocatore()
+        {
+            try
+            {
+                var giocatore = await _astaService.SelezionaGiocatoreRandomAsync();
+                var giocatoreDto = new GiocatoreDto
+                {
+                    ID_Giocatore = giocatore.ID_Giocatore,
+                    Nome = giocatore.Nome,
+                    Cognome = giocatore.Cognome
+                };
+                return Ok(giocatoreDto);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // API per cercare un giocatore specifico per nome (asta a chiamata)
+        // API per cercare un giocatore per cognome (asta a chiamata)
+        [HttpGet("{squadraId}/cercagiocatore/{cognome}")]
+        public async Task<ActionResult<GiocatoreDto>> CercaGiocatore(int squadraId, string cognome)
+        {
+            try
+            {
+                var giocatore = await _astaService.CercaGiocatorePerCognomeAsync(squadraId, cognome);
+                var giocatoreDto = new GiocatoreDto
+                {
+                    ID_Giocatore = giocatore.ID_Giocatore,
+                    Nome = giocatore.Nome,
+                    Cognome = giocatore.Cognome
+                };
+                return Ok(giocatoreDto);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }
 }
-

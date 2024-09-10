@@ -6,12 +6,28 @@
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.ItemProperties.FantaCalcio PreferredExecutionTarget="/Applications/Google Chrome.app" />
-  <MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workbench ActiveDocument="DTOs/RegisterModel.cs">
+    <Files>
+      <File FileName="Models/Asta.cs" Line="38" Column="1" />
+      <File FileName="Controllers/AstaController.cs" Line="167" Column="10" />
+      <File FileName="Services/AstaService.cs" Line="187" Column="14" />
+      <File FileName="Services/Interface/IAstaService.cs" Line="27" Column="86" />
+      <File FileName="Program.cs" Line="87" Column="13" />
+      <File FileName="Controllers/AuthenticationController.cs" Line="1" Column="1" />
+      <File FileName="DTOs/LoginResponseModel.cs" Line="1" Column="1" />
+      <File FileName="DTOs/RegisterModel.cs" Line="1" Column="1" />
+    </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
-          <Node name="FantaCalcio" expanded="True" selected="True">
-            <Node name="FantaCalcio" expanded="True" />
+          <Node name="FantaCalcio">
+            <Node name="FantaCalcio">
+              <Node name="Data" expanded="True" />
+              <Node name="DTOs">
+                <Node name="RegisterModel.cs" selected="True" />
+              </Node>
+              <Node name="Helpers" expanded="True" />
+            </Node>
           </Node>
         </State>
       </Pad>

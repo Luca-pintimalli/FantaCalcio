@@ -11,7 +11,11 @@ namespace FantaCalcio.DTOs
         public int CreditiDisponibili { get; set; }
         public int ID_Modalita { get; set; }
 
-
+        // Limiti per ruolo
+        public int MaxPortieri { get; set; }  // Limite massimo di portieri per squadra
+        public int MaxDifensori { get; set; }  // Limite massimo di difensori per squadra
+        public int MaxCentrocampisti { get; set; }  // Limite massimo di centrocampisti per squadra
+        public int MaxAttaccanti { get; set; }  // Limite massimo di attaccanti per squadra
 
         public string NomeUtente { get; set; } 
         public string NomeModalita { get; set; } // (Classic o Mantra)

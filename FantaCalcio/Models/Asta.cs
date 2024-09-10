@@ -25,6 +25,19 @@ namespace FantaCalcio.Models
         public int CreditiDisponibili { get; set; }
 
         [Required]
+        public int MaxPortieri { get; set; }  // Limite massimo di portieri per squadra
+
+        [Required]
+        public int MaxDifensori { get; set; }  // Limite massimo di difensori per squadra
+
+        [Required]
+        public int MaxCentrocampisti { get; set; }  // Limite massimo di centrocampisti per squadra
+
+        [Required]
+        public int MaxAttaccanti { get; set; }  // Limite massimo di attaccanti per squadra
+
+
+        [Required]
         public int ID_Modalita { get; set; } //Classic o Mantra
 
         [ForeignKey("ID_Utente")]
