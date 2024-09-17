@@ -63,11 +63,26 @@ namespace FantaCalcio.Services
         }
 
         // Ottenere tutti i giocatori
-        public async Task<IEnumerable<GiocatoreDto>> GetAll()
+        public async Task<IEnumerable<GiocatoreDto>> GetAll(string ruolo = null, string search = null)
         {
-            return await _dbContext.Giocatori
+            var query = _dbContext.Giocatori
                 .Include(g => g.RuoliMantra)
                 .ThenInclude(rm => rm.Ruolo)
+                .AsQueryable();
+
+            // Filtra i giocatori per RuoloClassic ignorando maiuscole e minuscole
+            if (!string.IsNullOrEmpty(ruolo))
+            {
+                query = query.Where(g => g.RuoloClassic.ToUpper() == ruolo.ToUpper());
+            }
+
+            // Filtra i giocatori per nome o cognome ignorando maiuscole e minuscole
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(g => g.Nome.ToUpper().Contains(search.ToUpper()) ||
+                                         g.Cognome.ToUpper().Contains(search.ToUpper()));
+            }
+            return await query
                 .Select(g => new GiocatoreDto
                 {
                     ID_Giocatore = g.ID_Giocatore,
@@ -79,16 +94,19 @@ namespace FantaCalcio.Services
                     Assist = g.Assist,
                     PartiteGiocate = g.PartiteGiocate,
                     RuoloClassic = g.RuoloClassic,
-                    // Mappa i ruoli Mantra con il nome del giocatore
                     RuoliMantra = g.RuoliMantra.Select(rm => new RuoloMantraDTO
                     {
                         ID = rm.ID,
                         ID_Giocatore = rm.ID_Giocatore,
-                        NomeGiocatore = g.Nome + " " + g.Cognome, 
+                        NomeGiocatore = g.Nome + " " + g.Cognome,
                         ID_Ruolo = rm.ID_Ruolo,
                         NomeRuolo = rm.Ruolo.NomeRuolo
                     }).ToList()
                 })
+                .OrderBy(g => g.RuoloClassic == "PORTIERE" ? 1 :
+                              g.RuoloClassic == "DIFENSORE" ? 2 :
+                              g.RuoloClassic == "CENTROCAMPISTA" ? 3 :
+                              g.RuoloClassic == "ATTACCANTE" ? 4 : 5)
                 .ToListAsync();
         }
 

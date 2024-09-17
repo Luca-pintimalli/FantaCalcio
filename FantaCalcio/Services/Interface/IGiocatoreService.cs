@@ -1,25 +1,15 @@
-﻿using FantaCalcio.DTOs;
-using FantaCalcio.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using FantaCalcio.DTOs;
 
 namespace FantaCalcio.Services.Interface
 {
     public interface IGiocatoreService
     {
-        // Aggiungi un nuovo giocatore (senza ruoli Mantra)
-        Task AddGiocatore(GiocatoreCreateUpdateDto giocatoreDTO);
-
-        // Aggiorna un giocatore esistente (senza ruoli Mantra)
-        Task UpdateGiocatore(int id, GiocatoreCreateUpdateDto giocatoreDTO);
-
-        // Ottenere tutti i giocatori con ruoli Mantra inclusi
-        Task<IEnumerable<GiocatoreDto>> GetAll();
-
-        // Ottenere giocatore per ID (con ruoli Mantra inclusi)
+        Task<IEnumerable<GiocatoreDto>> GetAll(string ruolo = null, string search = null);  
         Task<GiocatoreDto> GetGiocatoreById(int id);
-
-        // Eliminare un giocatore
-        Task DeleteGiocatore(int ID_Giocatore);
+        Task AddGiocatore(GiocatoreCreateUpdateDto giocatoreDto);
+        Task UpdateGiocatore(int id, GiocatoreCreateUpdateDto giocatoreDto);
+        Task DeleteGiocatore(int id);
     }
 }

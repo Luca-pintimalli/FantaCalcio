@@ -1,6 +1,7 @@
 ﻿using FantaCalcio.DTOs;
 using FantaCalcio.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -50,13 +51,12 @@ public class GiocatoriController : ControllerBase
             return StatusCode(500, new { message = ex.Message });
         }
     }
-
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GiocatoreDto>>> GetAllGiocatori()
+    public async Task<ActionResult<IEnumerable<GiocatoreDto>>> GetAllGiocatori([FromQuery] string ruolo = null, [FromQuery] string search = null)
     {
         try
         {
-            var giocatori = await _giocatoreService.GetAll();
+            var giocatori = await _giocatoreService.GetAll(ruolo, search);
 
             if (giocatori == null || !giocatori.Any())
             {
@@ -67,9 +67,12 @@ public class GiocatoriController : ControllerBase
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"Errore durante il recupero dei giocatori: {ex.Message}");
             return StatusCode(500, new { message = ex.Message });
         }
     }
+
+
 
     [HttpGet("{id}")]
     public async Task<ActionResult<GiocatoreDto>> GetGiocatoreById(int id)
@@ -90,4 +93,28 @@ public class GiocatoriController : ControllerBase
             return StatusCode(500, new { message = ex.Message });
         }
     }
+
+
+
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteGiocatore(int id)
+    {
+        try
+        {
+            await _giocatoreService.DeleteGiocatore(id);
+            return Ok(new { message = "Giocatore eliminato con successo." });
+        }
+        catch (DbUpdateException dbEx)
+        {
+            // Qui catturiamo l'eccezione interna
+            var innerException = dbEx.InnerException != null ? dbEx.InnerException.Message : dbEx.Message;
+            return StatusCode(500, new { message = $"Errore durante l'eliminazione del giocatore: {innerException}" });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
 }

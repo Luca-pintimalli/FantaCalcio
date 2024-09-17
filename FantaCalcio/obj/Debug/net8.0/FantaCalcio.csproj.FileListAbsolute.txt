@@ -139,3 +139,4 @@
 /Users/lucapintimalli/Documents/GitHub/FantaCalcio/FantaCalcio/obj/Debug/net8.0/FantaCalcio.pdb
 /Users/lucapintimalli/Documents/GitHub/FantaCalcio/FantaCalcio/obj/Debug/net8.0/FantaCalcio.genruntimeconfig.cache
 /Users/lucapintimalli/Documents/GitHub/FantaCalcio/FantaCalcio/obj/Debug/net8.0/ref/FantaCalcio.dll
+/Users/lucapintimalli/Documents/GitHub/FantaCalcio/FantaCalcio/bin/Debug/net8.0/FantaCalcio.staticwebassets.runtime.json

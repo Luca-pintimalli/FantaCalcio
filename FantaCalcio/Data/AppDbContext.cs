@@ -16,7 +16,7 @@ namespace FantaCalcio.Data
         public DbSet<Squadra> Squadre { get; set; }
         public DbSet<Operazione> Operazioni { get; set; }
         public DbSet<TipoAsta> TipoAsta { get; set; }  
-        public DbSet<RuoloMantra> RuoloMantra { get; set; } 
+        public DbSet<RuoloMantra> RuoloMantra { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -50,12 +50,12 @@ namespace FantaCalcio.Data
                 .HasForeignKey(s => s.ID_Asta)
                 .OnDelete(DeleteBehavior.NoAction);  // No cascading delete
 
-            // Relazione 1:N tra Giocatore e Operazione
+            // Relazione 1:N tra Giocatore e Operazione (Cascading delete per eliminare operazioni legate al giocatore)
             modelBuilder.Entity<Operazione>()
                 .HasOne(o => o.Giocatore)
                 .WithMany(g => g.Operazioni)
                 .HasForeignKey(o => o.ID_Giocatore)
-                .OnDelete(DeleteBehavior.NoAction);  // No cascading delete
+                .OnDelete(DeleteBehavior.Cascade);  // Cascading delete abilitato
 
             // Relazione 1:N tra Squadra e Operazione
             modelBuilder.Entity<Operazione>()
@@ -71,12 +71,12 @@ namespace FantaCalcio.Data
                 .HasForeignKey(r => r.ID_Modalita)
                 .OnDelete(DeleteBehavior.NoAction);  // No cascading delete
 
-            // Relazione 1:N tra Giocatore e RuoloMantra
+            // Relazione 1:N tra Giocatore e RuoloMantra (Cascading delete per eliminare i RuoliMantra legati al giocatore)
             modelBuilder.Entity<RuoloMantra>()
                 .HasOne(rm => rm.Giocatore)
                 .WithMany(g => g.RuoliMantra)
                 .HasForeignKey(rm => rm.ID_Giocatore)
-                .OnDelete(DeleteBehavior.NoAction);  // No cascading delete
+                .OnDelete(DeleteBehavior.Cascade);  // Cascading delete abilitato
 
             // Relazione 1:N tra Ruolo e RuoloMantra
             modelBuilder.Entity<RuoloMantra>()
@@ -84,7 +84,7 @@ namespace FantaCalcio.Data
                 .WithMany(r => r.RuoliMantra)
                 .HasForeignKey(rm => rm.ID_Ruolo)
                 .OnDelete(DeleteBehavior.NoAction);  // No cascading delete
-           
         }
+
     }
 }
