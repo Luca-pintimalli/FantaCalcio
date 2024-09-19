@@ -105,17 +105,20 @@ public class AuthenticationController : ControllerBase
         {
             return Unauthorized();
         }
-
         var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, user.Nome),
-            new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
+{
+    new Claim(ClaimTypes.Name, user.Nome),
+    new Claim(ClaimTypes.NameIdentifier, user.ID_Utente.ToString()),  // Assicurati che sia numerico
+    new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+};
+
+
 
         var key = new SymmetricSecurityKey(_key);
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var expiration = DateTime.UtcNow.AddYears(1); // Scadenza del token impostata a 1 anno
+        var expiration = DateTime.UtcNow.AddYears(1);
+
         var token = new JwtSecurityToken(
             issuer: _issuer,
             audience: _audience,
@@ -129,12 +132,13 @@ public class AuthenticationController : ControllerBase
             UserName = user.Nome,
             Cognome = user.Cognome,
             Email = user.Email,
-            Foto = user.Foto,  // URL della foto, può essere null
+            Foto = user.Foto,
             Token = new JwtSecurityTokenHandler().WriteToken(token),
             Expires = expiration,
             DataRegistrazione = user.DataRegistrazione
         });
     }
+
 
     [HttpPut("update-profile-picture/{id}")]
     public async Task<IActionResult> UpdateProfilePicture(int id, IFormFile foto)

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FantaCalcio")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+58d532071126677ab5cb7e80cc6658b864b58bc9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+20ba21c71a274fb940645c11c3992affeaabf9a9")]
 [assembly: System.Reflection.AssemblyProductAttribute("FantaCalcio")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FantaCalcio")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

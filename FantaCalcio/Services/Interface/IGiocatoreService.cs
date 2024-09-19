@@ -1,15 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using FantaCalcio.DTOs;
+using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
-using FantaCalcio.DTOs;
 
-namespace FantaCalcio.Services.Interface
+public interface IGiocatoreService
 {
-    public interface IGiocatoreService
-    {
-        Task<IEnumerable<GiocatoreDto>> GetAll(string ruolo = null, string search = null);  
-        Task<GiocatoreDto> GetGiocatoreById(int id);
-        Task AddGiocatore(GiocatoreCreateUpdateDto giocatoreDto);
-        Task UpdateGiocatore(int id, GiocatoreCreateUpdateDto giocatoreDto);
-        Task DeleteGiocatore(int id);
-    }
+    Task<IEnumerable<GiocatoreDto>> GetAll(string ruolo = null, string search = null);
+    Task<GiocatoreDto> GetGiocatoreById(int id);
+    Task AddGiocatore(GiocatoreCreateUpdateDto giocatoreDto, string filePath);
+    Task UpdateGiocatore(int id, GiocatoreCreateUpdateDto giocatoreDto, IFormFile file);  // Modifica qui
+    Task DeleteGiocatore(int id);
 }

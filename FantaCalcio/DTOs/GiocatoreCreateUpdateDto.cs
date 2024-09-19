@@ -1,11 +1,9 @@
-﻿using System;
-namespace FantaCalcio.DTOs
+﻿namespace FantaCalcio.DTOs
 {
     public class GiocatoreCreateUpdateDto
     {
         public string Nome { get; set; }
         public string Cognome { get; set; }
-        public string Foto { get; set; }
         public string SquadraAttuale { get; set; }
         public int GoalFatti { get; set; }
         public int GoalSubiti { get; set; }
@@ -14,4 +12,3 @@ namespace FantaCalcio.DTOs
         public string RuoloClassic { get; set; }
     }
 }
-

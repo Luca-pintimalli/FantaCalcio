@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FantaCalcio.Data;
@@ -20,47 +19,74 @@ namespace FantaCalcio.Services
         }
 
         // Aggiungi un giocatore senza gestire i ruoli Mantra
-        public async Task AddGiocatore(GiocatoreCreateUpdateDto giocatoreDTO)
+        public async Task AddGiocatore(GiocatoreCreateUpdateDto giocatoreDto, string filePath)
         {
             var giocatore = new Giocatore
             {
-                Nome = giocatoreDTO.Nome,
-                Cognome = giocatoreDTO.Cognome,
-                Foto = giocatoreDTO.Foto,
-                SquadraAttuale = giocatoreDTO.SquadraAttuale,
-                GoalFatti = giocatoreDTO.GoalFatti,
-                GoalSubiti = giocatoreDTO.GoalSubiti,
-                Assist = giocatoreDTO.Assist,
-                PartiteGiocate = giocatoreDTO.PartiteGiocate,
-                RuoloClassic = giocatoreDTO.RuoloClassic
+                Nome = giocatoreDto.Nome,
+                Cognome = giocatoreDto.Cognome,
+                Foto = filePath, // Utilizza il percorso dell'immagine fornito
+                SquadraAttuale = giocatoreDto.SquadraAttuale,
+                GoalFatti = giocatoreDto.GoalFatti,
+                GoalSubiti = giocatoreDto.GoalSubiti,
+                Assist = giocatoreDto.Assist,
+                PartiteGiocate = giocatoreDto.PartiteGiocate,
+                RuoloClassic = giocatoreDto.RuoloClassic
             };
 
             _dbContext.Giocatori.Add(giocatore);
             await _dbContext.SaveChangesAsync();
         }
 
-        // Aggiorna un giocatore (solo i dettagli del giocatore, non i ruoli Mantra)
-        public async Task UpdateGiocatore(int id, GiocatoreCreateUpdateDto giocatoreDTO)
+
+
+
+
+        public async Task UpdateGiocatore(int id, GiocatoreCreateUpdateDto giocatoreDto, IFormFile file)
         {
             var giocatoreEsistente = await _dbContext.Giocatori.FindAsync(id);
 
             if (giocatoreEsistente == null)
             {
-                throw new Exception($"Giocatore con ID {id} non trovato.");
+                throw new KeyNotFoundException($"Giocatore con ID {id} non trovato.");
             }
 
-            giocatoreEsistente.Nome = giocatoreDTO.Nome;
-            giocatoreEsistente.Cognome = giocatoreDTO.Cognome;
-            giocatoreEsistente.Foto = giocatoreDTO.Foto;
-            giocatoreEsistente.SquadraAttuale = giocatoreDTO.SquadraAttuale;
-            giocatoreEsistente.GoalFatti = giocatoreDTO.GoalFatti;
-            giocatoreEsistente.GoalSubiti = giocatoreDTO.GoalSubiti;
-            giocatoreEsistente.Assist = giocatoreDTO.Assist;
-            giocatoreEsistente.PartiteGiocate = giocatoreDTO.PartiteGiocate;
-            giocatoreEsistente.RuoloClassic = giocatoreDTO.RuoloClassic;
+            // Aggiorna i campi del giocatore esistente
+            giocatoreEsistente.Nome = giocatoreDto.Nome ?? giocatoreEsistente.Nome;
+            giocatoreEsistente.Cognome = giocatoreDto.Cognome ?? giocatoreEsistente.Cognome;
+            giocatoreEsistente.SquadraAttuale = giocatoreDto.SquadraAttuale ?? giocatoreEsistente.SquadraAttuale;
+            giocatoreEsistente.GoalFatti = giocatoreDto.GoalFatti >= 0 ? giocatoreDto.GoalFatti : giocatoreEsistente.GoalFatti;
+            giocatoreEsistente.GoalSubiti = giocatoreDto.GoalSubiti >= 0 ? giocatoreDto.GoalSubiti : giocatoreEsistente.GoalSubiti;
+            giocatoreEsistente.Assist = giocatoreDto.Assist >= 0 ? giocatoreDto.Assist : giocatoreEsistente.Assist;
+            giocatoreEsistente.PartiteGiocate = giocatoreDto.PartiteGiocate >= 0 ? giocatoreDto.PartiteGiocate : giocatoreEsistente.PartiteGiocate;
+            giocatoreEsistente.RuoloClassic = giocatoreDto.RuoloClassic ?? giocatoreEsistente.RuoloClassic;
 
+            // Aggiorna il percorso dell'immagine solo se è stato fornito un nuovo file
+            if (file != null && file.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+
+                giocatoreEsistente.Foto = $"/uploads/{uniqueFileName}";
+            }
+
+            // Salva le modifiche nel database
             await _dbContext.SaveChangesAsync();
         }
+
+
+
 
         // Ottenere tutti i giocatori
         public async Task<IEnumerable<GiocatoreDto>> GetAll(string ruolo = null, string search = null)
@@ -70,18 +96,17 @@ namespace FantaCalcio.Services
                 .ThenInclude(rm => rm.Ruolo)
                 .AsQueryable();
 
-            // Filtra i giocatori per RuoloClassic ignorando maiuscole e minuscole
             if (!string.IsNullOrEmpty(ruolo))
             {
                 query = query.Where(g => g.RuoloClassic.ToUpper() == ruolo.ToUpper());
             }
 
-            // Filtra i giocatori per nome o cognome ignorando maiuscole e minuscole
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(g => g.Nome.ToUpper().Contains(search.ToUpper()) ||
                                          g.Cognome.ToUpper().Contains(search.ToUpper()));
             }
+
             return await query
                 .Select(g => new GiocatoreDto
                 {
@@ -110,40 +135,53 @@ namespace FantaCalcio.Services
                 .ToListAsync();
         }
 
-
         // Ottenere giocatore per ID
         public async Task<GiocatoreDto> GetGiocatoreById(int id)
         {
-            var giocatore = await _dbContext.Giocatori
-                .Include(g => g.RuoliMantra)
-                .ThenInclude(rm => rm.Ruolo)
-                .FirstOrDefaultAsync(g => g.ID_Giocatore == id);
-
-            if (giocatore == null)
+            try
             {
-                return null;
-            }
+                // Ricerca del giocatore con i ruoli Mantra associati
+                var giocatore = await _dbContext.Giocatori
+                    .Include(g => g.RuoliMantra)
+                    .ThenInclude(rm => rm.Ruolo)
+                    .FirstOrDefaultAsync(g => g.ID_Giocatore == id);
 
-            return new GiocatoreDto
-            {
-                ID_Giocatore = giocatore.ID_Giocatore,
-                Nome = giocatore.Nome,
-                Cognome = giocatore.Cognome,
-                SquadraAttuale = giocatore.SquadraAttuale,
-                GoalFatti = giocatore.GoalFatti,
-                GoalSubiti = giocatore.GoalSubiti,
-                Assist = giocatore.Assist,
-                PartiteGiocate = giocatore.PartiteGiocate,
-                RuoloClassic = giocatore.RuoloClassic,
-                RuoliMantra = giocatore.RuoliMantra.Select(rm => new RuoloMantraDTO
+                if (giocatore == null)
                 {
-                    ID = rm.ID,
-                    ID_Giocatore = rm.ID_Giocatore,
-                    NomeGiocatore = giocatore.Nome + " " + giocatore.Cognome, 
-                    ID_Ruolo = rm.ID_Ruolo,
-                    NomeRuolo = rm.Ruolo.NomeRuolo
-                }).ToList()
-            };
+                    return null;
+                }
+
+                // Creazione del DTO e gestione dei campi che potrebbero essere null
+                return new GiocatoreDto
+                {
+                    ID_Giocatore = giocatore.ID_Giocatore,
+                    Nome = giocatore.Nome ?? "Nome non disponibile", // Gestisci null
+                    Cognome = giocatore.Cognome ?? "Cognome non disponibile", // Gestisci null
+                    Foto = giocatore.Foto ?? "Nessuna foto disponibile", // Gestisci null
+                    SquadraAttuale = giocatore.SquadraAttuale ?? "Squadra non disponibile", // Gestisci null
+                    GoalFatti = giocatore.GoalFatti,
+                    GoalSubiti = giocatore.GoalSubiti,
+                    Assist = giocatore.Assist,
+                    PartiteGiocate = giocatore.PartiteGiocate,
+                    RuoloClassic = giocatore.RuoloClassic ?? "Ruolo non disponibile", // Gestisci null
+
+                    // Gestione dei ruoli Mantra
+                    RuoliMantra = giocatore.RuoliMantra?.Select(rm => new RuoloMantraDTO
+                    {
+                        ID = rm.ID,
+                        ID_Giocatore = rm.ID_Giocatore,
+                        NomeGiocatore = giocatore.Nome + " " + giocatore.Cognome,
+                        ID_Ruolo = rm.ID_Ruolo,
+                        NomeRuolo = rm.Ruolo?.NomeRuolo ?? "Ruolo non disponibile" // Gestisci null
+                    }).ToList() ?? new List<RuoloMantraDTO>() // Se non ci sono ruoli, restituisci una lista vuota
+                };
+            }
+            catch (Exception ex)
+            {
+                // Log dell'errore per identificare il punto esatto dell'eccezione
+                Console.WriteLine($"Errore durante il recupero del giocatore con ID {id}: {ex.Message}");
+                throw;
+            }
         }
 
 
@@ -151,21 +189,43 @@ namespace FantaCalcio.Services
         public async Task DeleteGiocatore(int ID_Giocatore)
         {
             var giocatore = await _dbContext.Giocatori.FirstOrDefaultAsync(g => g.ID_Giocatore == ID_Giocatore);
+
             if (giocatore == null)
             {
+                Console.WriteLine($"Giocatore con ID {ID_Giocatore} non trovato.");
                 throw new Exception($"Giocatore con ID {ID_Giocatore} non trovato.");
             }
 
-            // Elimina le associazioni con RuoloMantra prima di eliminare il giocatore
-            var ruoliMantraAssociati = _dbContext.RuoloMantra
-                .Where(rm => rm.ID_Giocatore == ID_Giocatore);
+            Console.WriteLine($"Trovato giocatore con ID {ID_Giocatore}.");
 
-            _dbContext.RuoloMantra.RemoveRange(ruoliMantraAssociati);
+            var ruoliMantraAssociati = await _dbContext.RuoloMantra
+                .Where(rm => rm.ID_Giocatore == ID_Giocatore)
+                .ToListAsync();
 
-            // Ora elimina il giocatore
+            if (ruoliMantraAssociati != null && ruoliMantraAssociati.Any())
+            {
+                Console.WriteLine($"Trovati {ruoliMantraAssociati.Count} ruoli associati. Procedo con l'eliminazione.");
+                _dbContext.RuoloMantra.RemoveRange(ruoliMantraAssociati);
+            }
+            else
+            {
+                Console.WriteLine("Nessun ruolo Mantra associato trovato.");
+            }
+
             _dbContext.Giocatori.Remove(giocatore);
-            await _dbContext.SaveChangesAsync();
+
+            try
+            {
+                await _dbContext.SaveChangesAsync();
+                Console.WriteLine("Giocatore eliminato con successo.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Errore durante l'eliminazione: {ex.Message}");
+                throw;
+            }
         }
+
 
     }
 }

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using FantaCalcio.DTOs;
 using FantaCalcio.Services.Interface;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FantaCalcio.Controllers
 {
@@ -36,6 +38,7 @@ namespace FantaCalcio.Controllers
         }
 
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<AstaDto>> Create([FromBody] AstaCreateUpdateDto astaDto)
         {
@@ -60,7 +63,7 @@ namespace FantaCalcio.Controllers
 
             try
             {
-                // Crea l'asta e ottieni il suo ID
+                // Passa l'ID utente dal token JWT e il DTO per creare l'asta
                 var astaCreata = await _astaService.AddAsta(userId, astaDto);
 
                 // Usa l'ID dell'asta appena creata per il ritorno
@@ -71,6 +74,8 @@ namespace FantaCalcio.Controllers
                 return BadRequest($"Errore durante la creazione dell'asta: {ex.Message}");
             }
         }
+
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] AstaCreateUpdateDto astaDto)
@@ -144,7 +149,6 @@ namespace FantaCalcio.Controllers
             }
         }
 
-        // API per cercare un giocatore specifico per nome (asta a chiamata)
         // API per cercare un giocatore per cognome (asta a chiamata)
         [HttpGet("{squadraId}/cercagiocatore/{cognome}")]
         public async Task<ActionResult<GiocatoreDto>> CercaGiocatore(int squadraId, string cognome)

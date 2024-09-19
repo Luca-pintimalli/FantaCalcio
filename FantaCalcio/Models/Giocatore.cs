@@ -19,7 +19,7 @@ namespace FantaCalcio.Models
 
         [MaxLength(255)]
         [Url]
-        public string Foto { get; set; }
+        public string? Foto { get; set; }
 
         [MaxLength(100)]
         public string SquadraAttuale { get; set; }
