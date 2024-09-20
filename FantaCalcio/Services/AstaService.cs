@@ -122,19 +122,27 @@ namespace FantaCalcio.Services
                         Nome = $"Squadra {astaEsistente.Squadre.Count + i}",
                         ID_Asta = astaEsistente.ID_Asta,
                         CreditiTotali = astaEsistente.CreditiDisponibili,
-                        CreditiSpesi = 0
+                        CreditiSpesi = 0,
+                        Stemma = "/uploads/default-stemma.png" // Imposta il valore di default
                     };
                     _dbContext.Squadre.Add(nuovaSquadra);
                 }
             }
 
-            // Salva le modifiche
+            // Quando aggiorni squadre esistenti, verifica il campo Stemma
+            foreach (var squadra in astaEsistente.Squadre)
+            {
+                if (string.IsNullOrEmpty(squadra.Stemma))
+                {
+                    squadra.Stemma = "/uploads/default-stemma.png"; // Imposta il valore di default solo se non esiste già
+                }
+            }
+
             await _dbContext.SaveChangesAsync();
         }
 
-
-        // Elimina un'asta e tutte le entità collegate (ad es. Squadre)
-        public async Task DeleteAsta(int ID_Asta)
+            // Elimina un'asta e tutte le entità collegate (ad es. Squadre)
+            public async Task DeleteAsta(int ID_Asta)
         {
             // Include le squadre collegate all'asta
             var asta = await _dbContext.Aste.Include(a => a.Squadre)
