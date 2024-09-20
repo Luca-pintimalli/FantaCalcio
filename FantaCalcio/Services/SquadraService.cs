@@ -44,8 +44,10 @@ namespace FantaCalcio.Services
         }
 
 
-        // Aggiorna una squadra esistente
-        public async Task UpdateSquadra(int ID_Squadra, SquadraDto squadraDto)
+        // Implementazione del metodo UpdateSquadra con supporto per il file immagine
+
+        // Metodo per aggiornare una squadra
+        public async Task UpdateSquadra(int ID_Squadra, SquadraUpdateDto squadraDto, IFormFile? foto)
         {
             var squadraEsistente = await _dbContext.Squadre.FirstOrDefaultAsync(s => s.ID_Squadra == ID_Squadra);
             if (squadraEsistente == null)
@@ -55,11 +57,30 @@ namespace FantaCalcio.Services
 
             // Aggiorna i campi
             squadraEsistente.Nome = squadraDto.Nome;
-            squadraEsistente.Stemma = squadraDto.Stemma;
-            squadraEsistente.CreditiSpesi = squadraDto.CreditiSpesi;
+            squadraEsistente.CreditiTotali = squadraDto.CreditiTotali;
+
+            // Se c'è un'immagine, gestisci il caricamento
+            if (foto != null)
+            {
+                var uploadsDir = Path.Combine("wwwroot/uploads");
+                if (!Directory.Exists(uploadsDir))
+                {
+                    Directory.CreateDirectory(uploadsDir);
+                }
+
+                var filePath = Path.Combine(uploadsDir, foto.FileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await foto.CopyToAsync(stream);
+                }
+
+                squadraEsistente.Stemma = $"/uploads/{foto.FileName}";
+            }
 
             await _dbContext.SaveChangesAsync();
         }
+
+
 
         // Cancella una squadra esistente
         public async Task DeleteSquadra(int ID_Squadra)

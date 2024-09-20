@@ -18,7 +18,7 @@ namespace FantaCalcio.Models
 
         [MaxLength(255)]
         [Url]
-        public string Stemma { get; set; }
+        public string? Stemma { get; set; }
 
         [Required]
         [Range(0, int.MaxValue)]

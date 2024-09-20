@@ -1,11 +1,12 @@
 ﻿using System;
 using FantaCalcio.DTOs;
+using FantaCalcio.Models;
 
 namespace FantaCalcio.Services.Interface
 {
     public interface IOperazioneService
     {
-        Task CreateOperazione(OperazioneDto operazioneDto);
+        Task<Operazione> CreaOperazione(OperazioneDto operazioneDto);
 
         Task UpdateOperazione(int ID_Operazione, OperazioneDto operazioneDto);
 

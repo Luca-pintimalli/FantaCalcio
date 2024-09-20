@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "+j1HXeu0srbnqPcCuM4VDHfXhEa1DAkcNktL1Cqdm2U=",
+  "Hash": "LK2gcH3B6Jkw/7xUBKm8sHGtX33p7f9v+qMC2vRkkRI=",
   "Source": "FantaCalcio",
   "BasePath": "_content/FantaCalcio",
   "Mode": "Default",
@@ -454,6 +454,25 @@
       "OriginalItemSpec": "wwwroot/uploads/default-avatar.jpg"
     },
     {
+      "Identity": "/Users/lucapintimalli/Documents/GitHub/FantaCalcio/FantaCalcio/wwwroot/uploads/default-stemma.png",
+      "SourceId": "FantaCalcio",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/lucapintimalli/Documents/GitHub/FantaCalcio/FantaCalcio/wwwroot/",
+      "BasePath": "_content/FantaCalcio",
+      "RelativePath": "uploads/default-stemma.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/uploads/default-stemma.png"
+    },
+    {
       "Identity": "/Users/lucapintimalli/Documents/GitHub/FantaCalcio/FantaCalcio/wwwroot/uploads/e385a251-bf87-41cf-8bc8-790e2e994a64_moggi.jpeg",
       "SourceId": "FantaCalcio",
       "SourceType": "Discovered",
@@ -585,6 +604,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot/uploads/faea466e-c195-440e-80be-3c56d540adc7_margherita.jpeg"
+    },
+    {
+      "Identity": "/Users/lucapintimalli/Documents/GitHub/FantaCalcio/FantaCalcio/wwwroot/uploads/moggi.jpeg",
+      "SourceId": "FantaCalcio",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/lucapintimalli/Documents/GitHub/FantaCalcio/FantaCalcio/wwwroot/",
+      "BasePath": "_content/FantaCalcio",
+      "RelativePath": "uploads/moggi.jpeg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/uploads/moggi.jpeg"
     }
   ]
 }

@@ -14,39 +14,71 @@ namespace FantaCalcio.Services
     {
         private readonly AppDbContext _dbContext;
 
-        public AstaService(AppDbContext appDbContext)
+        public AstaService(AppDbContext dbContext)
         {
-            _dbContext = appDbContext;
+            _dbContext = dbContext;
         }
 
-        // Aggiungi una nuova asta
         public async Task<Asta> AddAsta(int userId, AstaCreateUpdateDto astaDto)
         {
             var asta = new Asta
             {
-                ID_Utente = userId,  // Inserisci l'ID utente recuperato dal JWT
+                ID_Utente = userId,
                 ID_TipoAsta = astaDto.ID_TipoAsta,
                 NumeroSquadre = astaDto.NumeroSquadre,
                 CreditiDisponibili = astaDto.CreditiDisponibili,
                 ID_Modalita = astaDto.ID_Modalita,
-                // Aggiungi i limiti per ruolo
                 MaxPortieri = astaDto.MaxPortieri,
                 MaxDifensori = astaDto.MaxDifensori,
                 MaxCentrocampisti = astaDto.MaxCentrocampisti,
                 MaxAttaccanti = astaDto.MaxAttaccanti
             };
 
-            _dbContext.Aste.Add(asta);
-            await _dbContext.SaveChangesAsync();
+            try
+            {
+                _dbContext.Aste.Add(asta);
+                await _dbContext.SaveChangesAsync();
+                Console.WriteLine($"Asta {asta.ID_Asta} creata correttamente.");
+
+                // Creazione delle squadre
+                for (int i = 1; i <= astaDto.NumeroSquadre; i++)
+                {
+                    var squadra = new Squadra
+                    {
+                        ID_Asta = asta.ID_Asta,
+                        Nome = $"Squadra {i}",
+                        Stemma = "/uploads/default-stemma.png",  // Percorso corretto per l'immagine di default
+                        CreditiSpesi = 0
+                    };
+
+                    _dbContext.Squadre.Add(squadra);
+                    Console.WriteLine($"Squadra {squadra.Nome} creata correttamente per l'asta {asta.ID_Asta}.");
+                }
+
+                await _dbContext.SaveChangesAsync();
+                Console.WriteLine($"Tutte le squadre per l'asta {asta.ID_Asta} sono state create correttamente.");
+            }
+            catch (DbUpdateException dbEx)
+            {
+                Console.WriteLine($"Errore durante il salvataggio nel database: {dbEx.Message} - Inner Exception: {dbEx.InnerException?.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Errore generico durante la creazione dell'asta: {ex.Message}");
+                throw;
+            }
 
             return asta;
         }
 
 
-        // Aggiorna un'asta esistente
+
+
         public async Task UpdateAsta(int ID_Asta, int userId, AstaCreateUpdateDto astaDto)
         {
-            var astaEsistente = await _dbContext.Aste.FirstOrDefaultAsync(a => a.ID_Asta == ID_Asta);
+            var astaEsistente = await _dbContext.Aste.Include(a => a.Squadre) // Include le squadre associate
+                                                      .FirstOrDefaultAsync(a => a.ID_Asta == ID_Asta);
 
             if (astaEsistente == null)
             {
@@ -58,7 +90,7 @@ namespace FantaCalcio.Services
             astaEsistente.NumeroSquadre = astaDto.NumeroSquadre;
             astaEsistente.CreditiDisponibili = astaDto.CreditiDisponibili;
             astaEsistente.ID_Modalita = astaDto.ID_Modalita;
-            astaEsistente.ID_Utente = userId;  // Assegna l'ID utente dal token JWT
+            astaEsistente.ID_Utente = userId;
 
             // Aggiorna i limiti per ruolo
             astaEsistente.MaxPortieri = astaDto.MaxPortieri;
@@ -66,21 +98,65 @@ namespace FantaCalcio.Services
             astaEsistente.MaxCentrocampisti = astaDto.MaxCentrocampisti;
             astaEsistente.MaxAttaccanti = astaDto.MaxAttaccanti;
 
+            // Se il numero di squadre è stato ridotto
+            if (astaDto.NumeroSquadre < astaEsistente.Squadre.Count)
+            {
+                // Trova le squadre da rimuovere
+                var squadreDaRimuovere = astaEsistente.Squadre
+                                        .OrderByDescending(s => s.ID_Squadra) // Rimuovi le ultime squadre create
+                                        .Take(astaEsistente.Squadre.Count - astaDto.NumeroSquadre)
+                                        .ToList();
+
+                // Rimuovi le squadre in eccesso
+                _dbContext.Squadre.RemoveRange(squadreDaRimuovere);
+            }
+
+            // Se il numero di squadre è stato aumentato
+            if (astaDto.NumeroSquadre > astaEsistente.Squadre.Count)
+            {
+                var squadreDaAggiungere = astaDto.NumeroSquadre - astaEsistente.Squadre.Count;
+                for (int i = 1; i <= squadreDaAggiungere; i++)
+                {
+                    var nuovaSquadra = new Squadra
+                    {
+                        Nome = $"Squadra {astaEsistente.Squadre.Count + i}",
+                        ID_Asta = astaEsistente.ID_Asta,
+                        CreditiTotali = astaEsistente.CreditiDisponibili,
+                        CreditiSpesi = 0
+                    };
+                    _dbContext.Squadre.Add(nuovaSquadra);
+                }
+            }
+
+            // Salva le modifiche
             await _dbContext.SaveChangesAsync();
         }
 
-        // Elimina un'asta
+
+        // Elimina un'asta e tutte le entità collegate (ad es. Squadre)
         public async Task DeleteAsta(int ID_Asta)
         {
-            var asta = await _dbContext.Aste.FirstOrDefaultAsync(a => a.ID_Asta == ID_Asta);
+            // Include le squadre collegate all'asta
+            var asta = await _dbContext.Aste.Include(a => a.Squadre)
+                                            .FirstOrDefaultAsync(a => a.ID_Asta == ID_Asta);
             if (asta == null)
             {
                 throw new KeyNotFoundException($"Asta con ID {ID_Asta} non trovata.");
             }
 
+            // Se ci sono squadre collegate all'asta, rimuovile
+            if (asta.Squadre != null && asta.Squadre.Any())
+            {
+                _dbContext.Squadre.RemoveRange(asta.Squadre);
+            }
+
+            // Rimuovi l'asta
             _dbContext.Aste.Remove(asta);
+
+            // Salva le modifiche nel database
             await _dbContext.SaveChangesAsync();
         }
+
 
         // Ottieni un'asta tramite ID
         public async Task<AstaDto> GetAstaById(int ID_Asta)
@@ -88,7 +164,7 @@ namespace FantaCalcio.Services
             var asta = await _dbContext.Aste
                 .Include(a => a.Modalita)
                 .Include(a => a.Utente)
-                .Include(a => a.TipoAsta)  // Include TipoAsta per caricare la descrizione
+                .Include(a => a.TipoAsta)
                 .FirstOrDefaultAsync(a => a.ID_Asta == ID_Asta);
 
             if (asta == null)
@@ -107,8 +183,6 @@ namespace FantaCalcio.Services
                 NomeUtente = asta.Utente?.Nome,
                 NomeModalita = asta.Modalita?.TipoModalita,
                 TipoAstaDescrizione = asta.TipoAsta?.NomeTipoAsta,
-
-                // Aggiungi i limiti per ruolo
                 MaxPortieri = asta.MaxPortieri,
                 MaxDifensori = asta.MaxDifensori,
                 MaxCentrocampisti = asta.MaxCentrocampisti,
@@ -116,14 +190,13 @@ namespace FantaCalcio.Services
             };
         }
 
-
         // Ottieni tutte le aste
         public async Task<IEnumerable<AstaDto>> GetAll()
         {
             var aste = await _dbContext.Aste
-                .Include(a => a.Modalita)  // Include Modalita
-                .Include(a => a.Utente)    // Include Utente
-                .Include(a => a.TipoAsta)  // Include TipoAsta per caricare la descrizione
+                .Include(a => a.Modalita)
+                .Include(a => a.Utente)
+                .Include(a => a.TipoAsta)
                 .ToListAsync();
 
             return aste.Select(a => new AstaDto
@@ -137,8 +210,6 @@ namespace FantaCalcio.Services
                 NomeUtente = a.Utente?.Nome,
                 NomeModalita = a.Modalita?.TipoModalita,
                 TipoAstaDescrizione = a.TipoAsta?.NomeTipoAsta,
-
-                // Aggiungi i limiti per ruolo
                 MaxPortieri = a.MaxPortieri,
                 MaxDifensori = a.MaxDifensori,
                 MaxCentrocampisti = a.MaxCentrocampisti,
@@ -146,8 +217,7 @@ namespace FantaCalcio.Services
             }).ToList();
         }
 
-
-        // Metodo per gestire il prossimo giocatore in base al tipo d'asta
+        // Metodo per gestire il prossimo giocatore
         public async Task<Giocatore> ProssimoGiocatoreAsync(int squadraId)
         {
             var squadra = await _dbContext.Squadre
@@ -161,12 +231,11 @@ namespace FantaCalcio.Services
 
             var asta = squadra.Asta;
 
-            // Verifica il tipo d'asta
-            if (asta.ID_TipoAsta == 2) // Se l'asta è di tipo random (ID 2)
+            if (asta.ID_TipoAsta == 2) // Asta random
             {
-                return await SelezionaGiocatoreRandomAsync(); // Nessun parametro necessario
+                return await SelezionaGiocatoreRandomAsync();
             }
-            else if (asta.ID_TipoAsta == 1) // Se l'asta è di tipo 'a chiamata' (ID 1)
+            else if (asta.ID_TipoAsta == 1) // Asta 'a chiamata'
             {
                 throw new Exception("L'utente deve cercare il giocatore.");
             }
@@ -174,11 +243,9 @@ namespace FantaCalcio.Services
             throw new Exception("Tipo d'asta non riconosciuto.");
         }
 
-
-        // Metodo per selezionare un giocatore casuale in base alla squadra
+        // Metodo per selezionare un giocatore casuale
         public async Task<Giocatore> SelezionaGiocatoreRandomAsync()
         {
-            // Seleziona tutti i giocatori che non sono stati già assegnati (o svincolati)
             var giocatoriDisponibili = await _dbContext.Giocatori
                 .Where(g => !_dbContext.Operazioni.Any(o => o.ID_Giocatore == g.ID_Giocatore))
                 .ToListAsync();
@@ -188,11 +255,9 @@ namespace FantaCalcio.Services
                 throw new Exception("Nessun giocatore disponibile.");
             }
 
-            // Seleziona un giocatore casuale dalla lista
             var random = new Random();
             return giocatoriDisponibili[random.Next(giocatoriDisponibili.Count)];
         }
-
 
         // Metodo per cercare un giocatore per cognome
         public async Task<Giocatore> CercaGiocatorePerCognomeAsync(int squadraId, string cognome)
@@ -217,7 +282,5 @@ namespace FantaCalcio.Services
 
             return giocatore;
         }
-
     }
 }
-

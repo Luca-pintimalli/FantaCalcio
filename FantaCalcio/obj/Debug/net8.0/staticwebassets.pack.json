@@ -93,6 +93,10 @@
       "PackagePath": "staticwebassets/uploads/default-avatar.jpg"
     },
     {
+      "Id": "/Users/lucapintimalli/Documents/GitHub/FantaCalcio/FantaCalcio/wwwroot/uploads/default-stemma.png",
+      "PackagePath": "staticwebassets/uploads/default-stemma.png"
+    },
+    {
       "Id": "/Users/lucapintimalli/Documents/GitHub/FantaCalcio/FantaCalcio/wwwroot/uploads/e385a251-bf87-41cf-8bc8-790e2e994a64_moggi.jpeg",
       "PackagePath": "staticwebassets/uploads/e385a251-bf87-41cf-8bc8-790e2e994a64_moggi.jpeg"
     },
@@ -119,6 +123,10 @@
     {
       "Id": "/Users/lucapintimalli/Documents/GitHub/FantaCalcio/FantaCalcio/wwwroot/uploads/faea466e-c195-440e-80be-3c56d540adc7_margherita.jpeg",
       "PackagePath": "staticwebassets/uploads/faea466e-c195-440e-80be-3c56d540adc7_margherita.jpeg"
+    },
+    {
+      "Id": "/Users/lucapintimalli/Documents/GitHub/FantaCalcio/FantaCalcio/wwwroot/uploads/moggi.jpeg",
+      "PackagePath": "staticwebassets/uploads/moggi.jpeg"
     },
     {
       "Id": "obj/Debug/net8.0/staticwebassets/msbuild.FantaCalcio.Microsoft.AspNetCore.StaticWebAssets.props",

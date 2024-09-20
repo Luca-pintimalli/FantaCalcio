@@ -15,12 +15,11 @@ namespace FantaCalcio.Services
         {
             _dbContext = dbContext;
         }
-
-        public async Task CreateOperazione(OperazioneDto operazioneDto)
+        public async Task<Operazione> CreaOperazione(OperazioneDto operazioneDto)
         {
             // Recupera la squadra associata all'operazione
             var squadra = await _dbContext.Squadre
-                .Include(s => s.Giocatori)  // Include i giocatori per contare i ruoli
+                .Include(s => s.Giocatori)
                 .FirstOrDefaultAsync(s => s.ID_Squadra == operazioneDto.ID_Squadra);
 
             if (squadra == null)
@@ -36,7 +35,7 @@ namespace FantaCalcio.Services
                 throw new KeyNotFoundException($"Asta con ID {squadra.ID_Asta} non trovata.");
             }
 
-            // Recupera il giocatore associato all'operazione per ottenere il ruolo
+            // Recupera il giocatore associato all'operazione
             var giocatore = await _dbContext.Giocatori.FirstOrDefaultAsync(g => g.ID_Giocatore == operazioneDto.ID_Giocatore);
 
             if (giocatore == null)
@@ -44,11 +43,20 @@ namespace FantaCalcio.Services
                 throw new KeyNotFoundException($"Giocatore con ID {operazioneDto.ID_Giocatore} non trovato.");
             }
 
-            // Verifica il numero di giocatori per ruolo utilizzando RuoloClassic
-            var numeroGiocatoriPerRuolo = squadra.Giocatori
-                .Count(g => g.RuoloClassic == giocatore.RuoloClassic);
+            // Verifica se il giocatore è già assegnato a una squadra nella stessa asta
+            var operazioneEsistente = await _dbContext.Operazioni
+                .Include(o => o.Squadra)
+                .FirstOrDefaultAsync(o => o.ID_Giocatore == operazioneDto.ID_Giocatore && o.Squadra.ID_Asta == squadra.ID_Asta);
 
-            // Verifica i limiti per ruolo in base all'asta
+            if (operazioneEsistente != null)
+            {
+                throw new InvalidOperationException("Il giocatore è già assegnato a una squadra in questa asta.");
+            }
+
+            // Verifica il numero di giocatori per ruolo
+            var numeroGiocatoriPerRuolo = squadra.Giocatori.Count(g => g.RuoloClassic == giocatore.RuoloClassic);
+
+            // Verifica i limiti per ruolo
             switch (giocatore.RuoloClassic)
             {
                 case "Portiere":
@@ -77,16 +85,16 @@ namespace FantaCalcio.Services
                     break;
             }
 
-            // Verifica se la squadra ha crediti sufficienti per completare l'operazione
+            // Verifica i crediti disponibili
             if (squadra.CreditiTotali - squadra.CreditiSpesi < operazioneDto.CreditiSpesi)
             {
                 throw new InvalidOperationException("Crediti insufficienti per completare l'operazione.");
             }
 
-            // Sottrai i crediti spesi
+            // Aggiorna i crediti spesi dalla squadra
             squadra.CreditiSpesi += operazioneDto.CreditiSpesi;
 
-            // Crea una nuova operazione (acquisto del giocatore)
+            // Crea una nuova operazione
             var operazione = new Operazione
             {
                 ID_Giocatore = operazioneDto.ID_Giocatore,
@@ -98,8 +106,10 @@ namespace FantaCalcio.Services
 
             _dbContext.Operazioni.Add(operazione);
 
-            // Salva i cambiamenti nel database (inclusi i crediti aggiornati e la nuova operazione)
+            // Salva i cambiamenti
             await _dbContext.SaveChangesAsync();
+
+            return operazione;
         }
 
 

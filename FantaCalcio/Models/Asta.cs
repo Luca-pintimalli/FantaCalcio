@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace FantaCalcio.Models
 {
@@ -49,6 +50,7 @@ namespace FantaCalcio.Models
         [ForeignKey("ID_TipoAsta")]
         public TipoAsta TipoAsta { get; set; }
 
+        [JsonIgnore]
         public ICollection<Squadra> Squadre { get; set; }
 
     }

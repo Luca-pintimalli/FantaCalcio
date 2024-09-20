@@ -6,6 +6,7 @@ namespace FantaCalcio.Controllers
     using System.Threading.Tasks;
     using global::FantaCalcio.DTOs;
     using global::FantaCalcio.Services.Interface;
+    using global::FantaCalcio.Services;
 
     namespace FantaCalcio.Controllers
     {
@@ -14,29 +15,33 @@ namespace FantaCalcio.Controllers
         public class OperazioneController : ControllerBase
         {
             private readonly IOperazioneService _operazioneService;
+            private readonly ISquadraService _squadraService;
 
-            public OperazioneController(IOperazioneService operazioneService)
+            public OperazioneController(ISquadraService squadraService, IOperazioneService operazioneService)
             {
+                _squadraService = squadraService;
                 _operazioneService = operazioneService;
             }
-
             // POST: api/operazione
             [HttpPost]
-            public async Task<IActionResult> CreateOperazione([FromBody] OperazioneDto operazioneDto)
+            public async Task<IActionResult> CreaOperazione([FromBody] OperazioneDto operazioneDto)
             {
-                if (operazioneDto == null)
-                {
-                    return BadRequest("L'operazione non può essere null.");
-                }
-
                 try
                 {
-                    await _operazioneService.CreateOperazione(operazioneDto);
-                    return Ok("Operazione creata con successo.");
+                    await _operazioneService.CreaOperazione(operazioneDto);
+                    return Ok(new { message = "Operazione creata con successo." });
+                }
+                catch (KeyNotFoundException ex)
+                {
+                    return NotFound(new { message = ex.Message });
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return BadRequest(new { message = ex.Message });
                 }
                 catch (Exception ex)
                 {
-                    return BadRequest($"Errore durante la creazione dell'operazione: {ex.Message}");
+                    return StatusCode(500, new { message = "Errore durante la creazione dell'operazione: " + ex.Message });
                 }
             }
 

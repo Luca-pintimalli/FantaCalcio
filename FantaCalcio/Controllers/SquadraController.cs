@@ -19,7 +19,7 @@ namespace FantaCalcio.Controllers
 
         // POST: api/squadra
         [HttpPost]
-        public async Task<IActionResult> CreateSquadra([FromBody] SquadraCreateDto squadraDto)
+        public async Task<IActionResult> CreateSquadra([FromForm] SquadraCreateDto squadraDto, [FromForm] IFormFile foto)
         {
             if (squadraDto == null)
             {
@@ -28,6 +28,22 @@ namespace FantaCalcio.Controllers
 
             try
             {
+                // Verifica se il file dell'immagine è stato caricato
+                if (foto != null)
+                {
+                    // Logica per salvare il file
+                    var filePath = Path.Combine("wwwroot/images", foto.FileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await foto.CopyToAsync(stream);
+                    }
+
+                    // Imposta il percorso del file nella proprietà Stemma
+                    squadraDto.Stemma = filePath;
+                }
+
+                // Crea la squadra nel database
                 await _squadraService.CreateSquadra(squadraDto.ID_Asta, squadraDto);
                 return Ok("Squadra creata con successo.");
             }
@@ -42,9 +58,10 @@ namespace FantaCalcio.Controllers
         }
 
 
-        // PUT: api/squadra/5
+
+
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateSquadra(int id, [FromBody] SquadraDto squadraDto)
+        public async Task<IActionResult> UpdateSquadra(int id, [FromForm] SquadraUpdateDto squadraDto, [FromForm] IFormFile? stemma)
         {
             if (squadraDto == null)
             {
@@ -53,7 +70,8 @@ namespace FantaCalcio.Controllers
 
             try
             {
-                await _squadraService.UpdateSquadra(id, squadraDto);
+                // Passa il DTO specifico per l'aggiornamento e il file immagine opzionale al servizio
+                await _squadraService.UpdateSquadra(id, squadraDto, stemma);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
@@ -65,6 +83,8 @@ namespace FantaCalcio.Controllers
                 return BadRequest($"Errore durante l'aggiornamento della squadra: {ex.Message}");
             }
         }
+
+
 
         // DELETE: api/squadra/5
         [HttpDelete("{id}")]

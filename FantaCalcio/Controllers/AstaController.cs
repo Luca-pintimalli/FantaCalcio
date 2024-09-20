@@ -5,6 +5,8 @@ using FantaCalcio.DTOs;
 using FantaCalcio.Services.Interface;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using FantaCalcio.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace FantaCalcio.Controllers
 {
@@ -36,7 +38,6 @@ namespace FantaCalcio.Controllers
             }
             return Ok(asta);
         }
-
 
         [Authorize]
         [HttpPost]
@@ -108,12 +109,12 @@ namespace FantaCalcio.Controllers
             }
         }
 
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
+                // Chiama il servizio per eliminare l'asta
                 await _astaService.DeleteAsta(id);
                 return NoContent();
             }
@@ -126,6 +127,7 @@ namespace FantaCalcio.Controllers
                 return BadRequest($"Errore durante la cancellazione dell'asta: {ex.Message}");
             }
         }
+
 
 
         // API per ottenere il prossimo giocatore in base alla squadra
