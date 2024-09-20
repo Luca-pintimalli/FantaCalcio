@@ -118,12 +118,33 @@ namespace FantaCalcio.Services
         // Aggiorna un'operazione esistente
         public async Task UpdateOperazione(int ID_Operazione, OperazioneDto operazioneDto)
         {
+            // Trova l'operazione esistente
             var operazioneEsistente = await _dbContext.Operazioni.FirstOrDefaultAsync(o => o.ID_Operazione == ID_Operazione);
 
             if (operazioneEsistente == null)
             {
                 throw new KeyNotFoundException($"Operazione con ID {ID_Operazione} non trovata.");
             }
+
+            // Trova la squadra associata all'operazione
+            var squadra = await _dbContext.Squadre.FirstOrDefaultAsync(s => s.ID_Squadra == operazioneEsistente.ID_Squadra);
+
+            if (squadra == null)
+            {
+                throw new KeyNotFoundException($"Squadra con ID {operazioneEsistente.ID_Squadra} non trovata.");
+            }
+
+            // Calcola i crediti disponibili
+            var creditiDisponibili = squadra.CreditiTotali - squadra.CreditiSpesi + operazioneEsistente.CreditiSpesi;
+
+            // Verifica se i nuovi crediti spesi sono maggiori dei crediti disponibili
+            if (operazioneDto.CreditiSpesi > creditiDisponibili)
+            {
+                throw new InvalidOperationException("Crediti insufficienti per completare l'operazione.");
+            }
+
+            // Aggiorna i crediti spesi della squadra (rimuovi quelli precedenti e aggiungi quelli nuovi)
+            squadra.CreditiSpesi = squadra.CreditiSpesi - operazioneEsistente.CreditiSpesi + operazioneDto.CreditiSpesi;
 
             // Aggiorna i campi dell'operazione
             operazioneEsistente.ID_Giocatore = operazioneDto.ID_Giocatore;
@@ -132,8 +153,11 @@ namespace FantaCalcio.Services
             operazioneEsistente.StatoOperazione = operazioneDto.StatoOperazione;
             operazioneEsistente.DataOperazione = operazioneDto.DataOperazione;
 
+            // Salva i cambiamenti
             await _dbContext.SaveChangesAsync();
         }
+
+
 
         // Cancella un'operazione esistente
         public async Task DeleteOperazione(int ID_Operazione)

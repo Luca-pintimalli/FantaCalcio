@@ -11,5 +11,7 @@ namespace FantaCalcio.DTOs
         public int CreditiTotali { get; set; }
 
         public string? Stemma { get; set; }  // Questo campo è opzionale se l'immagine non viene cambiata
+
+        public int CreditiSpesi { get; set; }
     }
 }

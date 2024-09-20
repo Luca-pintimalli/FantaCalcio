@@ -47,7 +47,8 @@ namespace FantaCalcio.Services
                     {
                         ID_Asta = asta.ID_Asta,
                         Nome = $"Squadra {i}",
-                        Stemma = "/uploads/default-stemma.png",  // Percorso corretto per l'immagine di default
+                        Stemma = "/uploads/default-stemma.png",
+                        CreditiTotali = astaDto.CreditiDisponibili,// Percorso corretto per l'immagine di default
                         CreditiSpesi = 0
                     };
 

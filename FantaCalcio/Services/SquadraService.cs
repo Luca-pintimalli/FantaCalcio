@@ -58,14 +58,24 @@ namespace FantaCalcio.Services
             // Aggiorna i campi
             squadraEsistente.Nome = squadraDto.Nome;
             squadraEsistente.CreditiTotali = squadraDto.CreditiTotali;
+            squadraEsistente.CreditiSpesi = squadraDto.CreditiSpesi;  // Aggiungi i crediti spesi
 
-            // Se c'è un'immagine, gestisci il caricamento
+            // Gestisci l'immagine se presente
             if (foto != null)
             {
                 var uploadsDir = Path.Combine("wwwroot/uploads");
                 if (!Directory.Exists(uploadsDir))
                 {
                     Directory.CreateDirectory(uploadsDir);
+                }
+
+                if (!string.IsNullOrEmpty(squadraEsistente.Stemma))
+                {
+                    var oldImagePath = Path.Combine(uploadsDir, Path.GetFileName(squadraEsistente.Stemma));
+                    if (File.Exists(oldImagePath))
+                    {
+                        File.Delete(oldImagePath);
+                    }
                 }
 
                 var filePath = Path.Combine(uploadsDir, foto.FileName);
@@ -79,6 +89,7 @@ namespace FantaCalcio.Services
 
             await _dbContext.SaveChangesAsync();
         }
+
 
 
 

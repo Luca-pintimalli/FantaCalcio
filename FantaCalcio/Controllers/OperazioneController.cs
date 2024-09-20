@@ -56,12 +56,17 @@ namespace FantaCalcio.Controllers
 
                 try
                 {
+                    // Prova ad aggiornare l'operazione
                     await _operazioneService.UpdateOperazione(id, operazioneDto);
                     return NoContent();
                 }
                 catch (KeyNotFoundException ex)
                 {
                     return NotFound(ex.Message);
+                }
+                catch (InvalidOperationException ex) // Eccezione per crediti insufficienti o altre logiche
+                {
+                    return BadRequest(ex.Message);
                 }
                 catch (Exception ex)
                 {
