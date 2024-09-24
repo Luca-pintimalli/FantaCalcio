@@ -17,6 +17,7 @@
 
         public List<RuoloMantraDTO> RuoliMantra { get; set; }
 
+        public string? StatoGiocatore { get; set; } = "Disponibile"; 
 
     }
 }

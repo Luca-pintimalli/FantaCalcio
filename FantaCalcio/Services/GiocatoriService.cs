@@ -60,16 +60,12 @@ namespace FantaCalcio.Services
             giocatoreEsistente.Assist = giocatoreDto.Assist >= 0 ? giocatoreDto.Assist : giocatoreEsistente.Assist;
             giocatoreEsistente.PartiteGiocate = giocatoreDto.PartiteGiocate >= 0 ? giocatoreDto.PartiteGiocate : giocatoreEsistente.PartiteGiocate;
             giocatoreEsistente.RuoloClassic = giocatoreDto.RuoloClassic ?? giocatoreEsistente.RuoloClassic;
+            giocatoreEsistente.StatoGiocatore = giocatoreDto.StatoGiocatore ?? giocatoreEsistente.StatoGiocatore; // Aggiornamento stato
 
             // Aggiorna il percorso dell'immagine solo se è stato fornito un nuovo file
             if (file != null && file.Length > 0)
             {
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                if (!Directory.Exists(uploadsFolder))
-                {
-                    Directory.CreateDirectory(uploadsFolder);
-                }
-
                 var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
                 var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
@@ -84,6 +80,7 @@ namespace FantaCalcio.Services
             // Salva le modifiche nel database
             await _dbContext.SaveChangesAsync();
         }
+
 
 
 
@@ -225,6 +222,72 @@ namespace FantaCalcio.Services
                 throw;
             }
         }
+        public async Task<IEnumerable<GiocatoreDto>> GetGiocatoriDisponibili(int idAsta)
+        {
+            var giocatoriDisponibili = await _dbContext.Giocatori
+                .Where(g => !_dbContext.Operazioni
+                                .Any(o => o.ID_Giocatore == g.ID_Giocatore
+                                          && o.ID_Asta == idAsta
+                                          && (o.StatoOperazione == "Assegnato" || o.StatoOperazione == "Svincolato"))) // Escludi giocatori con operazioni attive o svincolati
+                .ToListAsync();
+
+            return giocatoriDisponibili.Select(g => new GiocatoreDto
+            {
+                ID_Giocatore = g.ID_Giocatore,
+                Nome = g.Nome,
+                Cognome = g.Cognome,
+                RuoloClassic = g.RuoloClassic,
+                SquadraAttuale = g.SquadraAttuale,
+                Foto = g.Foto
+            }).AsEnumerable();
+        }
+
+
+        public async Task SvincolaGiocatoreAsync(int idGiocatore)
+        {
+            var giocatore = await _dbContext.Giocatori.FindAsync(idGiocatore);
+            if (giocatore == null)
+            {
+                throw new KeyNotFoundException($"Giocatore con ID {idGiocatore} non trovato.");
+            }
+
+            // Imposta lo stato del giocatore come "Svincolato"
+            giocatore.StatoGiocatore = "Svincolato";
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task RipristinaGiocatoreAsync(int idGiocatore)
+        {
+            var giocatore = await _dbContext.Giocatori.FindAsync(idGiocatore);
+            if (giocatore == null)
+            {
+                throw new KeyNotFoundException($"Giocatore con ID {idGiocatore} non trovato.");
+            }
+
+            // Ripristina lo stato del giocatore a "Disponibile"
+            giocatore.StatoGiocatore = "Disponibile";
+            await _dbContext.SaveChangesAsync();
+        }
+    
+
+    public async Task UpdateGiocatoreStato(int idGiocatore, string nuovoStato)
+        {
+            // Trova il giocatore nel database
+            var giocatore = await _dbContext.Giocatori.FirstOrDefaultAsync(g => g.ID_Giocatore == idGiocatore);
+
+            // Verifica che il giocatore esista
+            if (giocatore == null)
+            {
+                throw new KeyNotFoundException($"Giocatore con ID {idGiocatore} non trovato.");
+            }
+
+            // Aggiorna lo stato del giocatore
+            giocatore.StatoGiocatore = nuovoStato;
+
+            // Salva le modifiche nel database
+            await _dbContext.SaveChangesAsync();
+        }
+
 
 
     }

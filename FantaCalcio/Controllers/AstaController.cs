@@ -130,19 +130,36 @@ namespace FantaCalcio.Controllers
 
 
 
-        // API per ottenere il prossimo giocatore in base alla squadra
-        [HttpGet("prossimogiocatore")]
-        public async Task<ActionResult<GiocatoreDto>> ProssimoGiocatore()
+        // API per ottenere il prossimo giocatore in base all'asta corrente
+        [HttpGet("prossimogiocatore/{idAsta}")]
+        public async Task<ActionResult<GiocatoreDto>> ProssimoGiocatore(int idAsta)
         {
             try
             {
-                var giocatore = await _astaService.SelezionaGiocatoreRandomAsync();
+                // Passa l'ID dell'asta corrente per selezionare il giocatore random
+                var giocatore = await _astaService.SelezionaGiocatoreRandomAsync(idAsta);
+
+                // Popola tutti i campi nel GiocatoreDto, inclusi i ruoli Mantra, verificando che non sia null
                 var giocatoreDto = new GiocatoreDto
                 {
                     ID_Giocatore = giocatore.ID_Giocatore,
                     Nome = giocatore.Nome,
-                    Cognome = giocatore.Cognome
+                    Cognome = giocatore.Cognome,
+                    Foto = giocatore.Foto,
+                    SquadraAttuale = giocatore.SquadraAttuale,
+                    GoalFatti = giocatore.GoalFatti,
+                    GoalSubiti = giocatore.GoalSubiti,
+                    Assist = giocatore.Assist,
+                    PartiteGiocate = giocatore.PartiteGiocate,
+                    RuoloClassic = giocatore.RuoloClassic,
+                    RuoliMantra = giocatore.RuoliMantra != null
+                        ? giocatore.RuoliMantra.Select(rm => new RuoloMantraDTO
+                        {
+                            NomeRuolo = rm.Ruolo?.NomeRuolo  // Usa l'operatore null-safe in caso di ruoli non inizializzati
+                        }).ToList()
+                        : new List<RuoloMantraDTO>()  // Se la lista RuoliMantra è null, ritorna una lista vuota
                 };
+
                 return Ok(giocatoreDto);
             }
             catch (Exception ex)
@@ -151,25 +168,26 @@ namespace FantaCalcio.Controllers
             }
         }
 
-        // API per cercare un giocatore per cognome (asta a chiamata)
-        [HttpGet("{squadraId}/cercagiocatore/{cognome}")]
-        public async Task<ActionResult<GiocatoreDto>> CercaGiocatore(int squadraId, string cognome)
+
+
+
+
+        [HttpGet("{idAsta}/cercagiocatore")]
+        public async Task<ActionResult<Giocatore>> CercaGiocatore(int idAsta, [FromQuery] string? nome, [FromQuery] string? cognome)
         {
             try
             {
-                var giocatore = await _astaService.CercaGiocatorePerCognomeAsync(squadraId, cognome);
-                var giocatoreDto = new GiocatoreDto
-                {
-                    ID_Giocatore = giocatore.ID_Giocatore,
-                    Nome = giocatore.Nome,
-                    Cognome = giocatore.Cognome
-                };
-                return Ok(giocatoreDto);
+                // Passa l'ID dell'asta per cercare il giocatore disponibile
+                var giocatore = await _astaService.CercaGiocatoreAsync(idAsta, nome, cognome);
+                return Ok(giocatore); // Restituiamo l'intero oggetto Giocatore
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
+
+
     }
+
 }

@@ -84,6 +84,14 @@ namespace FantaCalcio.Data
                 .WithMany(r => r.RuoliMantra)
                 .HasForeignKey(rm => rm.ID_Ruolo)
                 .OnDelete(DeleteBehavior.NoAction);  // No cascading delete
+
+            // Relazione 1:N tra Asta e Operazione
+            modelBuilder.Entity<Operazione>()
+                .HasOne(o => o.Asta)  // Una operazione appartiene a una Asta
+                .WithMany(a => a.Operazioni)  // Una Asta può avere molte Operazioni
+                .HasForeignKey(o => o.ID_Asta)  // Collegamento tramite ID_Asta
+                .OnDelete(DeleteBehavior.NoAction);  // Disabilita il cascading delete per le aste
+
         }
 
     }

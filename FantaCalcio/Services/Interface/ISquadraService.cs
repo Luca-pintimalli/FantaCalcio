@@ -16,5 +16,8 @@ namespace FantaCalcio.Services.Interface
         Task<SquadraDto> GetSquadraById(int ID_Squadra);
 
         Task<IEnumerable<SquadraDto>> GetAll();
+
+        Task<IEnumerable<SquadraDto>> GetSquadreByAsta(int idAsta);
+
     }
 }

@@ -36,6 +36,9 @@ namespace FantaCalcio.Services
 
             try
             {
+                // Log: Creazione Asta
+                Console.WriteLine($"Creazione asta: ID_Utente={userId}, CreditiDisponibili={astaDto.CreditiDisponibili}, NumeroSquadre={astaDto.NumeroSquadre}");
+
                 _dbContext.Aste.Add(asta);
                 await _dbContext.SaveChangesAsync();
                 Console.WriteLine($"Asta {asta.ID_Asta} creata correttamente.");
@@ -48,12 +51,12 @@ namespace FantaCalcio.Services
                         ID_Asta = asta.ID_Asta,
                         Nome = $"Squadra {i}",
                         Stemma = "/uploads/default-stemma.png",
-                        CreditiTotali = astaDto.CreditiDisponibili,// Percorso corretto per l'immagine di default
+                        CreditiTotali = astaDto.CreditiDisponibili,
                         CreditiSpesi = 0
                     };
 
                     _dbContext.Squadre.Add(squadra);
-                    Console.WriteLine($"Squadra {squadra.Nome} creata correttamente per l'asta {asta.ID_Asta}.");
+                    Console.WriteLine($"Squadra {squadra.Nome} creata correttamente con CreditiTotali={squadra.CreditiTotali}, CreditiSpesi={squadra.CreditiSpesi} per l'asta {asta.ID_Asta}.");
                 }
 
                 await _dbContext.SaveChangesAsync();
@@ -229,67 +232,56 @@ namespace FantaCalcio.Services
         // Metodo per gestire il prossimo giocatore
         public async Task<Giocatore> ProssimoGiocatoreAsync(int squadraId)
         {
-            var squadra = await _dbContext.Squadre
-                .Include(s => s.Asta)
-                .FirstOrDefaultAsync(s => s.ID_Squadra == squadraId);
-
-            if (squadra == null || squadra.Asta == null)
-            {
-                throw new Exception("Squadra o asta non trovata.");
-            }
-
-            var asta = squadra.Asta;
-
-            if (asta.ID_TipoAsta == 2) // Asta random
-            {
-                return await SelezionaGiocatoreRandomAsync();
-            }
-            else if (asta.ID_TipoAsta == 1) // Asta 'a chiamata'
-            {
-                throw new Exception("L'utente deve cercare il giocatore.");
-            }
-
-            throw new Exception("Tipo d'asta non riconosciuto.");
+            return await SelezionaGiocatoreRandomAsync(squadraId);
         }
-
-        // Metodo per selezionare un giocatore casuale
-        public async Task<Giocatore> SelezionaGiocatoreRandomAsync()
+        public async Task<Giocatore> SelezionaGiocatoreRandomAsync(int idAsta)
         {
+            // Recupera i giocatori che non sono stati assegnati né svincolati nell'asta corrente
             var giocatoriDisponibili = await _dbContext.Giocatori
-                .Where(g => !_dbContext.Operazioni.Any(o => o.ID_Giocatore == g.ID_Giocatore))
+                .Include(g => g.RuoliMantra)
+                .ThenInclude(rm => rm.Ruolo)
+                .Where(g => !_dbContext.Operazioni
+                    .Any(o => o.ID_Giocatore == g.ID_Giocatore && o.ID_Asta == idAsta && (o.StatoOperazione == "Assegnato" || o.StatoOperazione == "Svincolato")))
                 .ToListAsync();
 
             if (!giocatoriDisponibili.Any())
             {
-                throw new Exception("Nessun giocatore disponibile.");
+                throw new Exception("Nessun giocatore disponibile per questa asta.");
             }
 
             var random = new Random();
             return giocatoriDisponibili[random.Next(giocatoriDisponibili.Count)];
         }
 
-        // Metodo per cercare un giocatore per cognome
-        public async Task<Giocatore> CercaGiocatorePerCognomeAsync(int squadraId, string cognome)
-        {
-            var squadra = await _dbContext.Squadre
-                .Include(s => s.Asta)
-                .FirstOrDefaultAsync(s => s.ID_Squadra == squadraId);
 
-            if (squadra == null || squadra.Asta == null)
+
+
+        // Metodo per cercare un giocatore per cognome
+        public async Task<Giocatore> CercaGiocatoreAsync(int idAsta, string? nome, string? cognome)
+        {
+            // Verifica che almeno uno dei parametri (nome o cognome) sia presente
+            if (string.IsNullOrEmpty(nome) && string.IsNullOrEmpty(cognome))
             {
-                throw new Exception("Squadra o asta non trovata.");
+                throw new Exception("Devi fornire almeno il nome o il cognome per la ricerca.");
             }
 
+            // Cerca un giocatore per nome o cognome, escludendo quelli già assegnati nell'asta corrente
             var giocatore = await _dbContext.Giocatori
-                .FirstOrDefaultAsync(g => g.Cognome.ToLower() == cognome.ToLower()
-                    && !_dbContext.Operazioni.Any(o => o.ID_Giocatore == g.ID_Giocatore && o.ID_Squadra == squadraId));
+                .Where(g => (string.IsNullOrEmpty(nome) || g.Nome == nome) &&
+                            (string.IsNullOrEmpty(cognome) || g.Cognome == cognome) &&
+                            !_dbContext.Operazioni
+                                .Any(o => o.ID_Giocatore == g.ID_Giocatore && o.Squadra.ID_Asta == idAsta))
+                .FirstOrDefaultAsync();
 
             if (giocatore == null)
             {
-                throw new Exception($"Giocatore con cognome {cognome} non trovato o già assegnato.");
+                throw new Exception("Giocatore non trovato o già assegnato in questa asta.");
             }
 
             return giocatore;
         }
+
+
+
     }
 }

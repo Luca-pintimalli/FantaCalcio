@@ -9,4 +9,10 @@ public interface IGiocatoreService
     Task AddGiocatore(GiocatoreCreateUpdateDto giocatoreDto, string filePath);
     Task UpdateGiocatore(int id, GiocatoreCreateUpdateDto giocatoreDto, IFormFile file);  // Modifica qui
     Task DeleteGiocatore(int id);
+
+    Task<IEnumerable<GiocatoreDto>> GetGiocatoriDisponibili(int idAsta);
+
+    Task SvincolaGiocatoreAsync(int idGiocatore);
+    Task RipristinaGiocatoreAsync(int idGiocatore);
+
 }

@@ -4,6 +4,7 @@ using FantaCalcio.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FantaCalcio.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240922104539_MakeSquadraNullableInOperazioni")]
+    partial class MakeSquadraNullableInOperazioni
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -116,11 +119,6 @@ namespace FantaCalcio.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("StatoGiocatore")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.HasKey("ID_Giocatore");
 
                     b.HasIndex("ID_Squadra");
@@ -154,14 +152,11 @@ namespace FantaCalcio.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID_Operazione"));
 
-                    b.Property<int?>("CreditiSpesi")
+                    b.Property<int>("CreditiSpesi")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("DataOperazione")
+                    b.Property<DateTime>("DataOperazione")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("ID_Asta")
-                        .HasColumnType("int");
 
                     b.Property<int>("ID_Giocatore")
                         .HasColumnType("int");
@@ -175,8 +170,6 @@ namespace FantaCalcio.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID_Operazione");
-
-                    b.HasIndex("ID_Asta");
 
                     b.HasIndex("ID_Giocatore");
 
@@ -361,12 +354,6 @@ namespace FantaCalcio.Migrations
 
             modelBuilder.Entity("FantaCalcio.Models.Operazione", b =>
                 {
-                    b.HasOne("FantaCalcio.Models.Asta", "Asta")
-                        .WithMany("Operazioni")
-                        .HasForeignKey("ID_Asta")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("FantaCalcio.Models.Giocatore", "Giocatore")
                         .WithMany("Operazioni")
                         .HasForeignKey("ID_Giocatore")
@@ -378,8 +365,6 @@ namespace FantaCalcio.Migrations
                         .HasForeignKey("ID_Squadra")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.Navigation("Asta");
 
                     b.Navigation("Giocatore");
 
@@ -429,8 +414,6 @@ namespace FantaCalcio.Migrations
 
             modelBuilder.Entity("FantaCalcio.Models.Asta", b =>
                 {
-                    b.Navigation("Operazioni");
-
                     b.Navigation("Squadre");
                 });
 

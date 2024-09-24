@@ -155,5 +155,26 @@ namespace FantaCalcio.Services
                 OperazioniIds = s.Operazioni.Select(o => o.ID_Operazione).ToList()
             }).ToList();
         }
+
+
+
+
+        public async Task<IEnumerable<SquadraDto>> GetSquadreByAsta(int idAsta)
+        {
+            var squadre = await _dbContext.Squadre
+                .Where(s => s.ID_Asta == idAsta)
+                .Select(s => new SquadraDto
+                {
+                    ID_Squadra = s.ID_Squadra,
+                    Nome = s.Nome,
+                    ID_Asta = s.ID_Asta,
+                    CreditiTotali = s.CreditiTotali,
+                    CreditiSpesi = s.CreditiSpesi,
+                    // Aggiungi altre proprietà se necessario
+                })
+                .ToListAsync();
+
+            return squadre;
+        }
     }
 }

@@ -156,4 +156,65 @@ public class GiocatoriController : ControllerBase
             return StatusCode(500, new { message = ex.Message });
         }
     }
+
+    [HttpGet("giocatoriDisponibili")]
+    public async Task<IActionResult> GetGiocatoriDisponibili(int idAsta)
+    {
+        try
+        {
+            var giocatoriDisponibili = await _giocatoreService.GetGiocatoriDisponibili(idAsta);
+            if (giocatoriDisponibili == null || !giocatoriDisponibili.Any())
+            {
+                return NotFound(new { message = "Nessun giocatore disponibile trovato." });
+            }
+
+            return Ok(giocatoriDisponibili);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Errore durante il recupero dei giocatori disponibili: {ex.Message}");
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+
+
+    [HttpPost("svincola/{idGiocatore}")]
+    public async Task<IActionResult> SvincolaGiocatore(int idGiocatore)
+    {
+        try
+        {
+            await _giocatoreService.SvincolaGiocatoreAsync(idGiocatore);
+            return Ok(new { message = "Giocatore svincolato con successo." });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = $"Errore durante lo svincolo del giocatore: {ex.Message}" });
+        }
+    }
+
+    [HttpPost("ripristina/{idGiocatore}")]
+    public async Task<IActionResult> RipristinaGiocatore(int idGiocatore)
+    {
+        try
+        {
+            await _giocatoreService.RipristinaGiocatoreAsync(idGiocatore);
+            return Ok(new { message = "Giocatore ripristinato con successo." });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = $"Errore durante il ripristino del giocatore: {ex.Message}" });
+        }
+    }
+
+
+
 }

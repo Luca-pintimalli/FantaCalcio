@@ -10,5 +10,7 @@
         public int Assist { get; set; }
         public int PartiteGiocate { get; set; }
         public string RuoloClassic { get; set; }
+        public string StatoGiocatore { get; set; } = "Disponibile"; 
+
     }
 }

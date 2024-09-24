@@ -13,14 +13,12 @@ namespace FantaCalcio.Models
         public int ID_Giocatore { get; set; }
 
         [Required]
-        public int ID_Squadra { get; set; }
+        public int? ID_Squadra { get; set; }
 
-        [Required]
         [Range(0, int.MaxValue)]
-        public int CreditiSpesi { get; set; }
+        public int? CreditiSpesi { get; set; }
 
-        [Required]
-        public DateTime DataOperazione { get; set; } = DateTime.Now;
+        public DateTime? DataOperazione { get; set; } = DateTime.Now;
 
         public string StatoOperazione { get; set; } = "Libero"; // Default 'Libero' 
 
@@ -30,5 +28,10 @@ namespace FantaCalcio.Models
 
         [ForeignKey("ID_Squadra")]
         public Squadra Squadra { get; set; }
+
+        public int ID_Asta { get; set; }
+
+        [ForeignKey("ID_Asta")]
+        public Asta Asta { get; set; }
     }
 }

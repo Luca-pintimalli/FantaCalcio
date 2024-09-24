@@ -124,5 +124,17 @@ namespace FantaCalcio.Controllers
             var squadre = await _squadraService.GetAll();
             return Ok(squadre);
         }
+
+
+        [HttpGet("asta/{idAsta}")]
+        public async Task<ActionResult<IEnumerable<SquadraDto>>> GetSquadreByAsta(int idAsta)
+        {
+            var squadre = await _squadraService.GetSquadreByAsta(idAsta);
+            if (squadre == null || !squadre.Any())
+            {
+                return NotFound($"Nessuna squadra trovata per l'asta con ID {idAsta}.");
+            }
+            return Ok(squadre);
+        }
     }
 }

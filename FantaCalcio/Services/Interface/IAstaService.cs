@@ -18,12 +18,12 @@ namespace FantaCalcio.Services.Interface
 
 
         // Metodo per selezionare un giocatore casuale
-        Task<Giocatore> SelezionaGiocatoreRandomAsync();
+        Task<Giocatore> SelezionaGiocatoreRandomAsync(int squadraId);
 
         // Metodo per gestire il prossimo giocatore in base al tipo d'asta (random o a chiamata)
         Task<Giocatore> ProssimoGiocatoreAsync(int squadraId);
 
         // Metodo per cercare un giocatore per cognome
-        Task<Giocatore> CercaGiocatorePerCognomeAsync(int squadraId, string cognome);
+        Task<Giocatore> CercaGiocatoreAsync(int idAsta, string nome, string cognome);
     }
 }

@@ -53,5 +53,7 @@ namespace FantaCalcio.Models
         [JsonIgnore]
         public ICollection<Squadra> Squadre { get; set; }
 
+        public ICollection<Operazione> Operazioni { get; set; }
+
     }
 }

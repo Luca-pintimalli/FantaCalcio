@@ -52,5 +52,10 @@ namespace FantaCalcio.Models
 
         public ICollection<Operazione> Operazioni { get; set; }
         public ICollection<RuoloMantra> RuoliMantra { get; set; }
+
+
+        [Required]
+        [MaxLength(50)]
+        public string StatoGiocatore { get; set; } = "Disponibile"; // Predefinito a "Disponibile"
     }
 }
